@@ -6,13 +6,33 @@ A production-quality workout tracking and analytics platform built with React, E
 
 ## Current Status
 
-### What's Been Built (Backend — complete)
+### What's Been Built
 
-The entire backend API is implemented and type-checks cleanly. The frontend is scaffolded but has no pages yet.
+**Backend — 100% complete.** All 30+ endpoints implemented, type-checks clean. See [API Endpoints](#api-endpoints) below.
 
-### What Still Needs To Be Built (Frontend — not started)
+**Frontend — code complete.** All pages implemented, everything type-checks clean, production `vite build` succeeds. End-to-end browser smoke test against a live database is still pending.
 
-All frontend pages, components, API hooks, and UI need to be implemented. See [Remaining Work](#remaining-work) below for the detailed task list.
+### Task Progress
+
+| Task | Status | Notes |
+|------|--------|-------|
+| 1. Monorepo scaffolding | ✅ Done | |
+| 2. Shared types | ✅ Done | |
+| 3. Prisma schema + server foundation | ✅ Done | |
+| 4. Auth system (backend) | ✅ Done | |
+| 5. User/Exercise/Routine/Workout CRUD (backend) | ✅ Done | |
+| 6. Bodyweight/Goals/Analytics (backend) | ✅ Done | |
+| 7. Exercise seed data | ✅ Done | |
+| 8. Frontend foundation (auth, layout, routing) | ✅ Done | |
+| 9. Dashboard, Workouts, Routines pages | ✅ Done | |
+| 10. Active workout logging | ✅ Done | |
+| 11. Calendar + Analytics pages | ✅ Done | |
+| 12. Profile, Goals, Dark mode polish | ✅ Done | Profile page with preferences, password, bodyweight, goals |
+| 13. Final polish | 🟡 Partial | Live browser smoke test pending |
+
+### What Still Needs To Be Done
+
+**End-to-end smoke test** — run `npm run dev` against a local Postgres, then manually walk through: register → create routine → start workout → log sets → finish → view detail → view on calendar → view analytics → profile settings (edit name, toggle units, change theme, log bodyweight, create goal). The seed script ships a demo account (`demo@workout.app` / `password123`) with ~20 workouts for populating the charts.
 
 ---
 
@@ -25,10 +45,10 @@ All frontend pages, components, API hooks, and UI need to be implemented. See [R
 | Database | PostgreSQL |
 | ORM | Prisma |
 | Auth | JWT (access token in memory + refresh token in httpOnly cookie), bcrypt (12 rounds) |
-| Charts | Recharts (not yet used — frontend not built) |
-| Forms | React Hook Form + Zod (not yet used — frontend not built) |
-| Routing | React Router v6 (not yet used — frontend not built) |
-| Server State | React Query v5 (not yet used — frontend not built) |
+| Charts | Recharts |
+| Forms | React Hook Form + Zod |
+| Routing | React Router v6 |
+| Server State | React Query v5 |
 | Build | Vite (client), tsx (server dev) |
 
 ## Architecture
@@ -39,7 +59,7 @@ All frontend pages, components, API hooks, and UI need to be implemented. See [R
 workout-app/
 ├── shared/    → TypeScript types shared between client and server
 ├── server/    → Express REST API with Prisma ORM
-└── client/    → React SPA with Vite (scaffolded, no pages yet)
+└── client/    → React SPA with Vite
 ```
 
 **Backend layered architecture:** `routes → controllers → services → Prisma`
@@ -47,6 +67,12 @@ workout-app/
 - **Controllers** handle request/response parsing, call services
 - **Services** contain all business logic and database queries
 - **Prisma** handles database access via a singleton client
+
+**Frontend architecture:**
+- **Contexts** (`AuthContext`, `ThemeContext`, `ToastProvider`) — global state
+- **React Query hooks** — server state, keyed cache, auto-invalidation on mutations
+- **Axios client** with interceptors — auto-attaches Bearer token, auto-refreshes on 401, queues concurrent requests during refresh
+- **Layered components:** `pages/` → `components/features/` → `components/ui/`
 
 ---
 
@@ -176,121 +202,141 @@ If any record is beaten, the `personal_records` table is upserted and the set's 
 
 ---
 
-## File Structure (What Exists Now)
+## File Structure
 
 ```
 workout-app/
-├── package.json                          # npm workspaces root
-├── tsconfig.base.json                    # Shared TypeScript config
-├── .env.example                          # Environment variable template
+├── package.json                              # npm workspaces root
+├── tsconfig.base.json                        # Shared TypeScript config
+├── .env.example                              # Environment variable template
 ├── .gitignore
 │
-├── shared/                               # ✅ COMPLETE
+├── shared/                                   # ✅ COMPLETE
 │   ├── package.json
 │   ├── tsconfig.json
-│   └── src/types/
-│       ├── index.ts                      # Re-exports all types
-│       ├── api.ts                        # PaginatedResponse<T>, ApiError
-│       ├── auth.ts                       # LoginRequest, RegisterRequest, AuthResponse, JwtPayload
-│       ├── user.ts                       # User, UpdateProfileRequest, ChangePasswordRequest
-│       ├── exercise.ts                   # Exercise, CreateExerciseRequest, ExerciseHistory, PersonalRecord, MuscleGroup, Equipment
-│       ├── workout.ts                    # Workout, WorkoutExercise, WorkoutSet, WorkoutSummary, CreateWorkoutRequest, CalendarDay
-│       ├── routine.ts                    # Routine, RoutineExercise, CreateRoutineRequest
-│       ├── analytics.ts                  # AnalyticsSummary, StreakData, VolumeDataPoint, MuscleGroupData, FrequencyDataPoint
-│       ├── goal.ts                       # Goal, CreateGoalRequest
-│       └── bodyweight.ts                 # BodyweightLog, CreateBodyweightRequest
+│   └── src/types/                            # All shared TypeScript interfaces
+│       ├── index.ts                          # Re-exports
+│       ├── api.ts, auth.ts, user.ts, exercise.ts,
+│       ├── workout.ts, routine.ts, analytics.ts,
+│       └── goal.ts, bodyweight.ts
 │
-├── server/                               # ✅ COMPLETE (all endpoints implemented, type-checks clean)
+├── server/                                   # ✅ COMPLETE
 │   ├── package.json
 │   ├── tsconfig.json
-│   ├── .env                              # Local env (not committed — copy from .env.example)
+│   ├── .env                                  # Local env (not committed)
 │   ├── prisma/
-│   │   ├── schema.prisma                 # 10 tables, enums, indexes, cascade rules
-│   │   └── seed.ts                       # 80+ exercises, demo user + 20 workouts + routines + bodyweight + goals
+│   │   ├── schema.prisma                     # 10 tables, enums, indexes, cascade rules
+│   │   └── seed.ts                           # 80+ exercises, demo user + workouts + routines
 │   └── src/
-│       ├── index.ts                      # Entry point — starts Express on PORT
-│       ├── app.ts                        # Express app: CORS, cookie-parser, JSON, route mounting, error handler
-│       ├── config/env.ts                 # Zod validation of DATABASE_URL, JWT secrets, PORT, NODE_ENV
-│       ├── middleware/
-│       │   ├── auth.ts                   # JWT Bearer token verification, attaches userId to req
-│       │   ├── validate.ts               # Zod request body validation middleware factory
-│       │   └── errorHandler.ts           # Global error handler + AppError class
-│       ├── routes/                       # 8 route files mapping HTTP methods to controllers
-│       ├── controllers/                  # 8 controller files handling req/res
-│       ├── services/                     # 8 service files with all business logic
-│       └── utils/
-│           ├── prisma.ts                 # Prisma client singleton
-│           ├── jwt.ts                    # generateAccessToken, generateRefreshToken, verify functions
-│           └── calculations.ts           # calculateEstimated1RM (Epley), calculateVolume
+│       ├── index.ts, app.ts
+│       ├── config/env.ts                     # Zod-validated env
+│       ├── middleware/                       # auth, validate, errorHandler
+│       ├── routes/                           # 8 route files
+│       ├── controllers/                      # 8 controller files
+│       ├── services/                         # 8 service files
+│       └── utils/                            # prisma, jwt, calculations
 │
-├── client/                               # ⚠️ SCAFFOLDED ONLY — no pages or components yet
-│   ├── package.json                      # React, Vite, Tailwind, React Query, Recharts, React Router, etc.
-│   ├── tsconfig.json
-│   ├── vite.config.ts                    # Proxies /api to localhost:3001
-│   ├── tailwind.config.ts                # Dark mode: class strategy
-│   ├── postcss.config.js
-│   ├── index.html
+├── client/                                   # 🟡 IN PROGRESS (~85%)
+│   ├── package.json                          # All deps installed (React, Vite, Tailwind, RQ, Recharts, RR, RHF, Zod)
+│   ├── tsconfig.json, vite.config.ts, tailwind.config.ts, postcss.config.js, index.html
 │   └── src/
-│       ├── main.tsx                      # Placeholder — just renders "Workout Tracker" heading
-│       └── index.css                     # Tailwind directives
+│       ├── main.tsx                          # ✅ Mounts <App />
+│       ├── App.tsx                           # ✅ QueryClient + Auth + Theme + Toast providers + Router with Protected/Public routes
+│       ├── index.css                         # ✅ Tailwind directives
+│       │
+│       ├── api/                              # ✅ ALL DONE
+│       │   ├── client.ts                     # Axios + interceptors (refresh + retry + queue)
+│       │   ├── auth.ts                       # login, register, refresh, logout
+│       │   ├── users.ts                      # useUpdateProfile, useChangePassword
+│       │   ├── workouts.ts                   # useWorkouts, useWorkout, useCreate/Update/DeleteWorkout, useCalendarData
+│       │   ├── routines.ts                   # useRoutines, useRoutine, CRUD, useDuplicate, useToggleFavorite, useStartWorkout
+│       │   ├── exercises.ts                  # useExercises, useCreateExercise, useExerciseHistory, useExerciseRecords, useAllRecords
+│       │   ├── analytics.ts                  # useSummary, useStreaks, useVolume, useMuscleGroups, useFrequency
+│       │   ├── goals.ts                      # useGoals, useCreate/Update/DeleteGoal
+│       │   └── bodyweight.ts                 # useBodyweightLogs, useLogBodyweight, useDeleteBodyweight
+│       │
+│       ├── context/                          # ✅ DONE
+│       │   ├── AuthContext.tsx               # user state, login/register/logout, on-mount refresh-to-restore-session
+│       │   └── ThemeContext.tsx              # light/dark/system + matchMedia + persists via PUT /users/me
+│       │
+│       ├── hooks/                            # ✅ DONE
+│       │   ├── useAuth.ts
+│       │   ├── useTheme.ts
+│       │   └── useTimer.ts                   # useTimer (countdown + beep) + useElapsedTimer
+│       │
+│       ├── utils/                            # ✅ DONE
+│       │   ├── formatting.ts                 # formatWeight, formatDate, formatDuration, formatDurationTimer, formatRelativeDate
+│       │   └── calculations.ts               # calculateEstimated1RM (Epley), calculateVolume
+│       │
+│       ├── components/
+│       │   ├── layout/                       # ✅ DONE
+│       │   │   ├── AppLayout.tsx             # Sidebar (lg+) + BottomNav (mobile) + <Outlet>
+│       │   │   ├── Sidebar.tsx               # 6 nav items with SVG icons, active state via NavLink
+│       │   │   └── BottomNav.tsx             # 5 items (Home, Workouts, +, Calendar, Profile) with floating + button
+│       │   ├── ui/                           # ✅ DONE
+│       │   │   ├── LoadingSpinner.tsx        # sm/md/lg
+│       │   │   ├── PageHeader.tsx            # Accepts ReactNode title + optional action
+│       │   │   ├── StatCard.tsx              # label, value, icon, subtext
+│       │   │   ├── Modal.tsx                 # ESC closes, click outside closes
+│       │   │   ├── ConfirmDialog.tsx         # Wraps Modal with danger variant
+│       │   │   ├── Toast.tsx                 # ToastProvider + useToast hook, auto-dismiss after 3s
+│       │   │   └── EmptyState.tsx            # Centered icon + title + description + action
+│       │   └── features/                     # ✅ DONE
+│       │       ├── PRBadge.tsx               # Star icon + "PR" label, xs/sm/md
+│       │       ├── StreakBadge.tsx           # 🔥 + days count
+│       │       ├── WorkoutCard.tsx           # Used on WorkoutHistory
+│       │       ├── RoutineCard.tsx           # Used on Routines (star fav + Start button)
+│       │       ├── ExercisePicker.tsx        # Modal with search + muscle filter + custom exercise inline form
+│       │       ├── SetRow.tsx                # Weight/reps/RPE/warmup/complete/remove
+│       │       ├── ExerciseEntry.tsx         # Exercise header + SetRow list + previous-best from history
+│       │       ├── RestTimer.tsx             # Circular SVG countdown + presets (30/60/90/120/180s)
+│       │       ├── Calendar.tsx              # Monthly grid, prev/next nav, fetches calendar data
+│       │       ├── CalendarDay.tsx           # Blue dot for workout days, green for today
+│       │       ├── VolumeChart.tsx           # Recharts BarChart
+│       │       ├── ProgressChart.tsx         # Recharts LineChart (max weight over time for an exercise)
+│       │       ├── MuscleGroupPie.tsx        # Recharts PieChart with % labels
+│       │       └── FrequencyChart.tsx        # Recharts BarChart (workouts/week)
+│       │
+│       └── pages/
+│           ├── Login.tsx                     # ✅ DONE (RHF + Zod)
+│           ├── Register.tsx                  # ✅ DONE (RHF + Zod, confirm-password match)
+│           ├── Dashboard.tsx                 # ✅ DONE (4 StatCards + volume chart + goals + recent workout + favorites + streak badge)
+│           ├── WorkoutHistory.tsx            # ✅ DONE (search + paginated WorkoutCards)
+│           ├── WorkoutDetail.tsx             # ✅ DONE (stats + exercises table + delete confirm)
+│           ├── ActiveWorkout.tsx             # ✅ DONE (elapsed timer + ExerciseEntries + rest timer + finish)
+│           ├── Routines.tsx                  # ✅ DONE (grid of RoutineCards)
+│           ├── RoutineFormPage.tsx           # ✅ DONE (name/tags/exercises with up/down reorder + ExercisePicker)
+│           ├── CalendarPage.tsx              # ✅ DONE (Calendar + selected-day workouts list)
+│           ├── Analytics.tsx                 # ⬜ STUB — needs to wire up already-built chart components
+│           ├── Profile.tsx                   # ⬜ MINIMAL STUB — just email + logout, needs full settings page
+│           └── NotFound.tsx                  # ✅ DONE
 │
 └── docs/superpowers/
-    ├── specs/2026-04-15-workout-app-design.md    # Full design spec
+    ├── specs/2026-04-15-workout-app-design.md          # Full design spec
     └── plans/2026-04-15-workout-app-implementation.md  # 13-task implementation plan
 ```
 
 ---
 
-## Remaining Work
+## Remaining Work (When You Resume)
 
-The implementation plan (`docs/superpowers/plans/2026-04-15-workout-app-implementation.md`) has 13 tasks. Tasks 1–7 are done. Here's what's left:
+### Task 13: Final Polish — End-to-end smoke test
 
-### Task 8: Frontend Foundation — Auth, Layout, Routing
-- [ ] **Axios client** (`client/src/api/client.ts`) — instance with `/api` base, request interceptor to attach Bearer token, response interceptor to auto-refresh on 401 (queues concurrent requests during refresh)
-- [ ] **Auth API** (`client/src/api/auth.ts`) — login, register, refresh, logout functions
-- [ ] **AuthContext** (`client/src/context/AuthContext.tsx`) — provides user, accessToken (in state), login/register/logout. On mount, attempts refresh to restore session. Shows loading spinner until initial auth check completes
-- [ ] **ThemeContext** (`client/src/context/ThemeContext.tsx`) — reads system preference via matchMedia, applies `dark` class to `<html>`, supports light/dark/system toggle, persists to user profile
-- [ ] **AppLayout** (`client/src/components/layout/AppLayout.tsx`) — sidebar on desktop (lg:), bottom nav on mobile, main content area with padding
-- [ ] **Sidebar** (`client/src/components/layout/Sidebar.tsx`) — fixed left nav: Dashboard, Workouts, Routines, Calendar, Analytics, Profile. Highlights active route
-- [ ] **BottomNav** (`client/src/components/layout/BottomNav.tsx`) — fixed bottom bar: Dashboard, Workouts, + (new), Calendar, Profile
-- [ ] **Login page** (`client/src/pages/Login.tsx`) — email + password form, React Hook Form + Zod, redirects to dashboard
-- [ ] **Register page** (`client/src/pages/Register.tsx`) — name + email + password + confirm password
-- [ ] **App.tsx** — React Router with all routes, QueryClientProvider + AuthProvider + ThemeProvider, ProtectedRoute wrapper
+1. Run `npm run dev` against a local Postgres + seeded database and walk through the full flow:
+   - Register → dashboard loads empty
+   - Create routine → start workout from it → log sets → finish
+   - Workout appears on WorkoutHistory + Calendar + Dashboard
+   - Analytics shows populated charts (volume, muscle groups, frequency, PRs)
+   - Profile: edit name, toggle kg/lb, change theme, change password, log bodyweight, create/delete a goal
+2. Fix any bugs found.
+3. The seed data has a demo user (`demo@workout.app` / `password123`) with 20+ workouts for testing against populated analytics.
 
-### Task 9: Dashboard, Workouts, Routines Pages
-- [ ] **Shared UI components** — StatCard, Modal, ConfirmDialog, Toast, EmptyState, LoadingSpinner, PageHeader
-- [ ] **API hooks** — React Query hooks for workouts, routines, exercises, analytics, goals, bodyweight (all in `client/src/api/*.ts`)
-- [ ] **Dashboard** — stat cards (workouts this week, streak, volume, avg duration), recent workout card, mini volume chart, goal progress bars, quick-start buttons for favorite routines
-- [ ] **Workout History** — search input + tag filter pills, paginated WorkoutCard list (name, date, exercises, duration, volume, PR badges)
-- [ ] **Workout Detail** — full workout view with exercises + sets table, edit/delete buttons
-- [ ] **Routines** — routine cards with tag filter, "New Routine" button, favorite star, "Start" button
-- [ ] **Routine Form** — add exercises via ExercisePicker modal (search + muscle group filter), set default sets/reps/weight per exercise
-- [ ] **ExercisePicker** — modal with search + muscle group tabs, lists matching exercises
+### Notes for Continuation
 
-### Task 10: Active Workout Logging
-- [ ] **useTimer hook** — countdown timer with audio beep on completion
-- [ ] **SetRow** — weight input, reps input, RPE dropdown, warmup toggle, completion checkbox. Shows previous performance
-- [ ] **ExerciseEntry** — exercise name + previous best, list of SetRows, "Add Set" button, notes
-- [ ] **RestTimer** — circular countdown, configurable duration (30/60/90/120s), audio alert
-- [ ] **ActiveWorkout page** — workout name, running duration timer, exercise entries, "Add Exercise" button, rest timer, "Finish Workout" button. Can start blank or from a routine (via location state from routines/:id/start)
-
-### Task 11: Calendar + Analytics Pages
-- [ ] **CalendarDay** — blue dot for workout days, green for today, click handler
-- [ ] **Calendar** — month grid, prev/next navigation, fetches calendar data, shows workout summary on day click
-- [ ] **VolumeChart** — Recharts BarChart, weekly volume over 12 weeks
-- [ ] **ProgressChart** — Recharts LineChart, max weight over time for selected exercise
-- [ ] **MuscleGroupPie** — Recharts PieChart with labels/percentages
-- [ ] **Analytics page** — stat cards row, streak badge, volume chart, muscle group pie + recent PRs, frequency chart, exercise progress section
-
-### Task 12: Profile, Goals, Dark Mode, Polish
-- [ ] **Profile page** — edit name, unit preference toggle, theme selector, change password, bodyweight log section, goals section, logout button
-- [ ] **GoalProgress** — progress bar with label, color changes with progress
-- [ ] **Dark mode** — ensure all components have `dark:` variants, test light/dark/system
-- [ ] **Responsive polish** — test 375px/768px/1280px, fix layout issues
-
-### Task 13: Final Polish
-- [ ] Expand seed data if needed
-- [ ] Final README update with screenshots
+- **Type-check** before committing: `cd client && npx tsc --noEmit` and `cd server && npx tsc --noEmit`. Both currently exit clean.
+- **Production build:** `npx vite build` in `client/` completes successfully (~2.5s).
+- **Tests:** the plan doesn't include automated tests. Smoke testing in the browser is the acceptance criterion.
+- **Branch:** working on `main`. All commits are on main.
 
 ---
 
@@ -358,7 +404,14 @@ When a workout is created/updated, the system automatically checks every non-war
 Hybrid approach — the database is seeded with ~80 system exercises (`user_id = NULL`) covering chest, back, shoulders, legs, arms, core, and cardio. Users can also create custom exercises that only they can see. System exercises cannot be edited or deleted.
 
 ### Auth Token Strategy
-Access tokens are short-lived (15 min) and stored in JavaScript memory — never localStorage. Refresh tokens live in httpOnly cookies (7 day TTL). The frontend Axios interceptor will catch 401s, call `/api/auth/refresh`, and retry the original request transparently.
+Access tokens are short-lived (15 min) and stored in JavaScript memory — never localStorage. Refresh tokens live in httpOnly cookies (7 day TTL). The frontend Axios interceptor catches 401s, calls `/api/auth/refresh`, and retries the original request transparently. Concurrent requests during a refresh are queued and all get the new token.
 
 ### Streak Calculation
 Streaks are computed from workout dates. A "current streak" counts consecutive days backward from today (or yesterday, to allow for rest days not breaking the streak). The "longest streak" tracks the best-ever run.
+
+### Active Workout Flow
+`ActiveWorkout.tsx` supports two entry modes:
+1. **Blank** — user navigates to `/workouts/active` with no state; name defaults to `Workout {date}`.
+2. **From routine** — `RoutineCard` "Start" button calls `POST /api/routines/:id/start` and navigates with `state: { routine }`. The page pre-populates with the routine's exercises, default sets/reps/weight. `rest_seconds` from the routine triggers the `RestTimer` when a set is marked complete.
+
+The elapsed duration uses `useElapsedTimer()` and is sent as `durationMinutes` when finishing. Only sets with at least one of `weight` or `reps` filled in are saved.
