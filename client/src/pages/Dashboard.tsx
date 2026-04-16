@@ -3,6 +3,7 @@ import { PageHeader } from '../components/ui/PageHeader';
 import { StatCard } from '../components/ui/StatCard';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { StreakBadge } from '../components/features/StreakBadge';
+import { GoalProgress } from '../components/features/GoalProgress';
 import { useSummary, useStreaks, useVolume } from '../api/analytics';
 import { useGoals } from '../api/goals';
 import { useRoutines } from '../api/routines';
@@ -96,29 +97,9 @@ export function Dashboard() {
               {goals
                 .filter((g) => g.isActive)
                 .slice(0, 4)
-                .map((goal) => {
-                  const progress = Math.min(100, (goal.currentProgress / goal.targetValue) * 100);
-                  const label =
-                    goal.type === 'workouts_per_week'
-                      ? `${goal.targetValue} workouts/week`
-                      : `${goal.exerciseName} · ${goal.targetValue} ${unit}`;
-                  return (
-                    <div key={goal.id}>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span className="text-gray-700 dark:text-gray-300 truncate">{label}</span>
-                        <span className="text-gray-500 dark:text-gray-400">
-                          {Math.round(goal.currentProgress)}/{goal.targetValue}
-                        </span>
-                      </div>
-                      <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-blue-600 transition-all"
-                          style={{ width: `${progress}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
+                .map((goal) => (
+                  <GoalProgress key={goal.id} goal={goal} unit={unit} />
+                ))}
             </div>
           ) : (
             <p className="text-gray-500 dark:text-gray-400 text-sm">
