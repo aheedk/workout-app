@@ -2,6 +2,16 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { errorHandler } from './middleware/errorHandler';
+import { authenticate } from './middleware/auth';
+import authRoutes from './routes/auth.routes';
+import userRoutes from './routes/user.routes';
+import exerciseRoutes from './routes/exercise.routes';
+import routineRoutes from './routes/routine.routes';
+import workoutRoutes from './routes/workout.routes';
+import bodyweightRoutes from './routes/bodyweight.routes';
+import goalRoutes from './routes/goal.routes';
+import analyticsRoutes from './routes/analytics.routes';
+import * as exerciseController from './controllers/exercise.controller';
 
 export const app = express();
 
@@ -9,6 +19,19 @@ app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
 app.use(cookieParser());
 app.use(express.json());
 
-// Routes will be mounted here
+// Public routes
+app.use('/api/auth', authRoutes);
+
+// Protected routes
+app.use('/api/users', authenticate, userRoutes);
+app.use('/api/exercises', authenticate, exerciseRoutes);
+app.use('/api/routines', authenticate, routineRoutes);
+app.use('/api/workouts', authenticate, workoutRoutes);
+app.use('/api/bodyweight', authenticate, bodyweightRoutes);
+app.use('/api/goals', authenticate, goalRoutes);
+app.use('/api/analytics', authenticate, analyticsRoutes);
+
+// All user PRs endpoint
+app.get('/api/records', authenticate, exerciseController.allRecords);
 
 app.use(errorHandler);
