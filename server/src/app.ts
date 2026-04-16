@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import { env } from './config/env';
 import { errorHandler } from './middleware/errorHandler';
 import { authenticate } from './middleware/auth';
 import authRoutes from './routes/auth.routes';
@@ -15,9 +16,11 @@ import * as exerciseController from './controllers/exercise.controller';
 
 export const app = express();
 
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+app.use(cors({ origin: env.FRONTEND_URL, credentials: true }));
 app.use(cookieParser());
 app.use(express.json());
+
+app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
 // Public routes
 app.use('/api/auth', authRoutes);

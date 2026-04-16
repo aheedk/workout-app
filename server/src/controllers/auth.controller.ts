@@ -2,10 +2,11 @@ import { Request, Response, NextFunction } from 'express';
 import * as authService from '../services/auth.service';
 import { verifyRefreshToken, generateAccessToken } from '../utils/jwt';
 
+const IS_PROD = process.env.NODE_ENV === 'production';
 const REFRESH_COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax' as const,
+  secure: IS_PROD,
+  sameSite: (IS_PROD ? 'none' : 'lax') as 'none' | 'lax',
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   path: '/',
 };
@@ -48,6 +49,6 @@ export async function refresh(req: Request, res: Response, next: NextFunction) {
 }
 
 export async function logout(_req: Request, res: Response) {
-  res.clearCookie('refreshToken', { path: '/' });
+  res.clearCookie('refreshToken', REFRESH_COOKIE_OPTIONS);
   return res.json({ message: 'Logged out' });
 }
