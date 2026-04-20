@@ -7,7 +7,7 @@ export function generateAccessToken(payload: JwtPayload): string {
 }
 
 export function generateRefreshToken(payload: JwtPayload): string {
-  return jwt.sign(payload, env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
+  return jwt.sign(payload, env.JWT_REFRESH_SECRET, { expiresIn: '180d' });
 }
 
 export function verifyAccessToken(token: string): JwtPayload {

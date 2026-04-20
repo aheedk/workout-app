@@ -1,13 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import * as authService from '../services/auth.service';
-import { verifyRefreshToken, generateAccessToken } from '../utils/jwt';
+import { verifyRefreshToken, generateAccessToken, generateRefreshToken } from '../utils/jwt';
 
 const IS_PROD = process.env.NODE_ENV === 'production';
 const REFRESH_COOKIE_OPTIONS = {
   httpOnly: true,
   secure: IS_PROD,
   sameSite: (IS_PROD ? 'none' : 'lax') as 'none' | 'lax',
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  maxAge: 180 * 24 * 60 * 60 * 1000, // 180 days
   path: '/',
 };
 
@@ -33,7 +33,7 @@ export async function login(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-export async function refresh(req: Request, res: Response, next: NextFunction) {
+export async function refresh(req: Request, res: Response, _next: NextFunction) {
   try {
     const token = req.cookies?.refreshToken;
     if (!token) {
@@ -41,7 +41,10 @@ export async function refresh(req: Request, res: Response, next: NextFunction) {
     }
 
     const payload = verifyRefreshToken(token);
-    const accessToken = generateAccessToken({ userId: payload.userId, email: payload.email });
+    const nextPayload = { userId: payload.userId, email: payload.email };
+    const accessToken = generateAccessToken(nextPayload);
+    const refreshToken = generateRefreshToken(nextPayload);
+    res.cookie('refreshToken', refreshToken, REFRESH_COOKIE_OPTIONS);
     return res.json({ accessToken });
   } catch {
     return res.status(401).json({ message: 'Invalid refresh token', statusCode: 401 });
