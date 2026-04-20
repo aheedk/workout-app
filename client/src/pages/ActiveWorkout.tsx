@@ -127,27 +127,28 @@ export function ActiveWorkout() {
     <div>
       <PageHeader
         title={
-          <span className="flex items-center gap-3">
-            <span>Active Workout</span>
-            <span className="text-sm font-mono font-normal text-gray-500 dark:text-gray-400">
+          <>
+            <span className="hidden sm:inline">Active Workout</span>
+            <span className="sm:hidden">Workout</span>
+            <span className="ml-2 text-sm font-mono font-normal text-gray-500 dark:text-gray-400">
               {formatDurationTimer(elapsed)}
             </span>
-          </span>
+          </>
         }
         action={
           <div className="flex gap-2">
             <button
               onClick={handleCancel}
-              className="px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm"
+              className="px-2 sm:px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
             >
               Cancel
             </button>
             <button
               onClick={handleFinish}
               disabled={createWorkout.isPending}
-              className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white font-medium rounded-lg"
+              className="px-3 sm:px-4 py-2 text-sm sm:text-base bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white font-medium rounded-lg whitespace-nowrap"
             >
-              {createWorkout.isPending ? 'Saving...' : 'Finish'}
+              {createWorkout.isPending ? 'Saving…' : 'Finish'}
             </button>
           </div>
         }

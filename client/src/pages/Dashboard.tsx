@@ -33,11 +33,11 @@ export function Dashboard() {
   return (
     <div>
       <PageHeader
-        title={`Welcome back${user?.name ? `, ${user.name.split(' ')[0]}` : ''}`}
+        title={user?.name ? `Hi, ${user.name.split(' ')[0]}` : 'Dashboard'}
         action={
           <Link
             to="/workouts/active"
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg"
+            className="px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm sm:text-base font-medium rounded-lg whitespace-nowrap"
           >
             Start Workout
           </Link>
