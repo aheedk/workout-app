@@ -307,13 +307,41 @@ function NumField({
   min?: number;
   step?: number;
 }) {
+  // Local string state so the user can freely clear the field and edit
+  // without the parent's number-typed value bouncing it back to "0".
+  const [text, setText] = useState<string>(String(value));
+
+  // Sync when the parent value changes externally (e.g. a different exercise).
+  useEffect(() => {
+    if (parseFloat(text) !== value) setText(String(value));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
+
   return (
     <label className="text-sm">
       <span className="block text-gray-500 dark:text-gray-400 text-xs mb-0.5">{label}</span>
       <input
         type="number"
-        value={value}
-        onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
+        value={text}
+        onChange={(e) => {
+          const v = e.target.value;
+          setText(v);
+          if (v === '' || v === '-') return; // allow mid-edit empty/minus
+          const parsed = parseFloat(v);
+          if (!Number.isNaN(parsed)) onChange(parsed);
+        }}
+        onBlur={() => {
+          // On blur, snap back to min (or 0) if empty / invalid.
+          const parsed = parseFloat(text);
+          if (Number.isNaN(parsed)) {
+            const fallback = min ?? 0;
+            setText(String(fallback));
+            onChange(fallback);
+          } else {
+            // Normalize display so "030" → "30".
+            setText(String(parsed));
+          }
+        }}
         min={min}
         step={step}
         className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
