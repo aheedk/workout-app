@@ -4,9 +4,12 @@ import { StatCard } from '../components/ui/StatCard';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { StreakBadge } from '../components/features/StreakBadge';
 import { GoalProgress } from '../components/features/GoalProgress';
+import { RoutineCard } from '../components/features/RoutineCard';
+import { PRBadge } from '../components/features/PRBadge';
 import { useSummary, useStreaks, useVolume } from '../api/analytics';
 import { useGoals } from '../api/goals';
 import { useRoutines } from '../api/routines';
+import { useWorkouts } from '../api/workouts';
 import { useAuth } from '../hooks/useAuth';
 import { formatDuration, formatRelativeDate } from '../utils/formatting';
 import { BarChart, Bar, ResponsiveContainer, Tooltip } from 'recharts';
@@ -18,9 +21,11 @@ export function Dashboard() {
   const { data: volume } = useVolume(6);
   const { data: goals } = useGoals();
   const { data: routines } = useRoutines();
+  const { data: recentList } = useWorkouts({ limit: 1 });
 
   const unit = user?.unitPreference ?? 'kg';
   const favorites = routines?.filter((r) => r.isFavorite).slice(0, 3) ?? [];
+  const recent = recentList?.data?.[0];
 
   if (loadingSummary) {
     return (
@@ -62,24 +67,114 @@ export function Dashboard() {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-        <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-          <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Active Goals</h3>
-          {goals && goals.filter((g) => g.isActive).length > 0 ? (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-gray-900 dark:text-white">Last Workout</h3>
+            <Link to="/workouts" className="text-sm text-blue-600 dark:text-blue-400 hover:underline">
+              History
+            </Link>
+          </div>
+          {recent ? (
+            <Link
+              to={`/workouts/${recent.id}`}
+              className="block -m-2 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-gray-900 dark:text-white truncate">{recent.name}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    {formatRelativeDate(recent.date)}
+                  </p>
+                </div>
+                {recent.hasPr && <PRBadge size="sm" />}
+              </div>
+
+              <div className="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                <Stat label="Exercises" value={recent.exerciseCount} />
+                <Stat
+                  label="Volume"
+                  value={`${recent.totalVolume.toLocaleString()} ${unit}`}
+                />
+                <Stat
+                  label="Duration"
+                  value={recent.durationMinutes ? formatDuration(recent.durationMinutes) : '—'}
+                />
+              </div>
+
+              {recent.tags.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {recent.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </Link>
+          ) : (
+            <p className="text-sm text-gray-500 dark:text-gray-400 py-4">
+              No workouts yet.{' '}
+              <Link to="/workouts/active" className="text-blue-600 dark:text-blue-400 hover:underline">
+                Start one
+              </Link>
+              .
+            </p>
+          )}
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-gray-900 dark:text-white">Favorite Routines</h3>
+            <Link to="/routines" className="text-sm text-blue-600 dark:text-blue-400 hover:underline">
+              View all
+            </Link>
+          </div>
+          {favorites.length > 0 ? (
             <div className="space-y-3">
+              {favorites.map((r) => (
+                <RoutineCard key={r.id} routine={r} />
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500 dark:text-gray-400 py-4">
+              Star a routine to see it here.{' '}
+              <Link to="/routines" className="text-blue-600 dark:text-blue-400 hover:underline">
+                Browse routines
+              </Link>
+              .
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+        <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Active Goals</h3>
+            <Link to="/profile" className="text-xs text-blue-600 dark:text-blue-400 hover:underline">
+              Manage
+            </Link>
+          </div>
+          {goals && goals.filter((g) => g.isActive).length > 0 ? (
+            <div className="space-y-2">
               {goals
                 .filter((g) => g.isActive)
-                .slice(0, 4)
+                .slice(0, 3)
                 .map((goal) => (
                   <GoalProgress key={goal.id} goal={goal} unit={unit} />
                 ))}
             </div>
           ) : (
-            <p className="text-gray-500 dark:text-gray-400 text-sm">
+            <p className="text-xs text-gray-500 dark:text-gray-400 py-2">
               No active goals.{' '}
               <Link to="/profile" className="text-blue-600 dark:text-blue-400 hover:underline">
                 Create one
               </Link>
+              .
             </p>
           )}
         </div>
@@ -111,63 +206,20 @@ export function Dashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-        {summary?.recentWorkout && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Most Recent Workout</h3>
-            <Link
-              to={`/workouts/${summary.recentWorkout.id}`}
-              className="block p-3 -mx-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
-            >
-              <p className="font-medium text-gray-900 dark:text-white">{summary.recentWorkout.name}</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                {formatRelativeDate(summary.recentWorkout.date)}
-              </p>
-            </Link>
-          </div>
-        )}
-
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-gray-900 dark:text-white">Favorite Routines</h3>
-            <Link to="/routines" className="text-sm text-blue-600 dark:text-blue-400 hover:underline">
-              View all
-            </Link>
-          </div>
-          {favorites.length > 0 ? (
-            <div className="space-y-2">
-              {favorites.map((r) => (
-                <Link
-                  key={r.id}
-                  to={`/routines/${r.id}/edit`}
-                  className="block p-3 -mx-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">
-                        ★ {r.name}
-                      </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {r.exercises.length} exercises
-                      </p>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Star a routine to see it here.
-            </p>
-          )}
-        </div>
-      </div>
-
       {streaks && streaks.currentStreak > 0 && (
         <div className="mt-6">
           <StreakBadge days={streaks.currentStreak} />
         </div>
       )}
+    </div>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div>
+      <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
+      <p className="font-medium text-gray-900 dark:text-white text-sm">{value}</p>
     </div>
   );
 }
