@@ -4,6 +4,7 @@ import { PageHeader } from '../components/ui/PageHeader';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { PRBadge } from '../components/features/PRBadge';
+import { ExerciseHistoryModal } from '../components/features/ExerciseHistoryModal';
 import { useWorkout, useDeleteWorkout } from '../api/workouts';
 import { useAuth } from '../hooks/useAuth';
 import { formatDate, formatDuration } from '../utils/formatting';
@@ -18,6 +19,7 @@ export function WorkoutDetail() {
   const { user } = useAuth();
   const { showToast } = useToast();
   const [showConfirm, setShowConfirm] = useState(false);
+  const [historyFor, setHistoryFor] = useState<{ id: string; name: string } | null>(null);
   const unit = user?.unitPreference ?? 'kg';
 
   const handleDelete = async () => {
@@ -110,9 +112,17 @@ export function WorkoutDetail() {
             key={exercise.id}
             className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5"
           >
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
-              {exercise.exerciseName}
-            </h3>
+            <div className="flex items-center justify-between gap-3 mb-3">
+              <h3 className="font-semibold text-gray-900 dark:text-white min-w-0 truncate">
+                {exercise.exerciseName}
+              </h3>
+              <button
+                onClick={() => setHistoryFor({ id: exercise.exerciseId, name: exercise.exerciseName })}
+                className="text-sm text-blue-600 dark:text-blue-400 hover:underline shrink-0"
+              >
+                History
+              </button>
+            </div>
             {exercise.notes && (
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{exercise.notes}</p>
             )}
@@ -127,19 +137,37 @@ export function WorkoutDetail() {
                 </tr>
               </thead>
               <tbody>
-                {exercise.sets.map((set) => (
-                  <tr key={set.id} className="border-b border-gray-100 dark:border-gray-700/50 last:border-0">
-                    <td className="py-2 pr-2 text-gray-900 dark:text-white">
-                      {set.isWarmup ? 'W' : set.setNumber}
-                    </td>
-                    <td className="py-2 pr-2 text-gray-900 dark:text-white">
-                      {set.weight != null ? `${set.weight} ${unit}` : '—'}
-                    </td>
-                    <td className="py-2 pr-2 text-gray-900 dark:text-white">{set.reps ?? '—'}</td>
-                    <td className="py-2 pr-2 text-gray-900 dark:text-white">{set.rpe ?? '—'}</td>
-                    <td className="py-2">{set.isPr && <PRBadge size="xs" />}</td>
-                  </tr>
-                ))}
+                {(() => {
+                  let workSetNumber = 0;
+                  return exercise.sets.map((set) => {
+                    if (!set.isWarmup && !set.isDropset) workSetNumber++;
+                    const label = set.isWarmup ? 'W' : set.isDropset ? 'D' : String(workSetNumber);
+                    return (
+                      <tr
+                        key={set.id}
+                        className={`border-b border-gray-100 dark:border-gray-700/50 last:border-0 ${
+                          set.isDropset ? 'bg-amber-50/40 dark:bg-amber-900/10' : ''
+                        }`}
+                      >
+                        <td
+                          className={`py-2 pr-2 font-medium ${
+                            set.isDropset
+                              ? 'text-amber-700 dark:text-amber-300'
+                              : 'text-gray-900 dark:text-white'
+                          }`}
+                        >
+                          {label}
+                        </td>
+                        <td className="py-2 pr-2 text-gray-900 dark:text-white">
+                          {set.weight != null ? `${set.weight} ${unit}` : '—'}
+                        </td>
+                        <td className="py-2 pr-2 text-gray-900 dark:text-white">{set.reps ?? '—'}</td>
+                        <td className="py-2 pr-2 text-gray-900 dark:text-white">{set.rpe ?? '—'}</td>
+                        <td className="py-2">{set.isPr && <PRBadge size="xs" />}</td>
+                      </tr>
+                    );
+                  });
+                })()}
               </tbody>
             </table>
           </div>
@@ -154,6 +182,13 @@ export function WorkoutDetail() {
         danger
         onConfirm={handleDelete}
         onCancel={() => setShowConfirm(false)}
+      />
+
+      <ExerciseHistoryModal
+        isOpen={historyFor !== null}
+        onClose={() => setHistoryFor(null)}
+        exerciseId={historyFor?.id}
+        exerciseName={historyFor?.name ?? ''}
       />
 
       <div className="mt-8">

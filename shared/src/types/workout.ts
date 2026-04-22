@@ -5,6 +5,7 @@ export interface WorkoutSet {
   reps: number | null;
   rpe: number | null;
   isWarmup: boolean;
+  isDropset: boolean;
   isPr: boolean;
 }
 
@@ -46,6 +47,7 @@ export interface CreateWorkoutSetInput {
   reps?: number | null;
   rpe?: number | null;
   isWarmup?: boolean;
+  isDropset?: boolean;
 }
 
 export interface CreateWorkoutExerciseInput {

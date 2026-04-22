@@ -38,6 +38,7 @@ export function ActiveWorkout() {
             reps: re.defaultReps,
             rpe: null,
             isWarmup: false,
+            isDropset: false,
             completed: false,
           })),
         }))
@@ -55,7 +56,7 @@ export function ActiveWorkout() {
         exerciseName: exercise.name,
         notes: '',
         restSeconds: 90,
-        sets: [{ weight: null, reps: null, rpe: null, isWarmup: false, completed: false }],
+        sets: [{ weight: null, reps: null, rpe: null, isWarmup: false, isDropset: false, completed: false }],
       },
     ]);
   };
@@ -98,6 +99,7 @@ export function ActiveWorkout() {
             reps: s.reps,
             rpe: s.rpe,
             isWarmup: s.isWarmup,
+            isDropset: s.isDropset,
           })),
       })),
     };

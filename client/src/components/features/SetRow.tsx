@@ -5,6 +5,7 @@ export interface SetData {
   reps: number | null;
   rpe: number | null;
   isWarmup: boolean;
+  isDropset: boolean;
   completed: boolean;
 }
 
@@ -20,14 +21,34 @@ export function SetRow({ setNumber, set, previous, onChange, onRemove }: SetRowP
   const { user } = useAuth();
   const unit = user?.unitPreference ?? 'kg';
 
+  const label = set.isWarmup ? 'W' : set.isDropset ? 'D' : String(setNumber);
+
+  const bgClass = set.completed
+    ? 'bg-green-50 dark:bg-green-900/20'
+    : set.isDropset
+    ? 'bg-amber-50/50 dark:bg-amber-900/10'
+    : '';
+
+  // isWarmup and isDropset are mutually exclusive — toggling one off-toggles the other
+  const toggleWarmup = (checked: boolean) => {
+    onChange({ isWarmup: checked, isDropset: checked ? false : set.isDropset });
+  };
+  const toggleDropset = (checked: boolean) => {
+    onChange({ isDropset: checked, isWarmup: checked ? false : set.isWarmup });
+  };
+
   return (
     <div
-      className={`grid grid-cols-[32px_1fr_1fr_1fr_auto_auto] gap-2 items-center py-2 px-2 rounded ${
-        set.completed ? 'bg-green-50 dark:bg-green-900/20' : ''
-      }`}
+      className={`grid grid-cols-[28px_1fr_1fr_1fr_auto_auto_auto] gap-2 items-center py-2 px-2 rounded ${bgClass}`}
     >
-      <span className="text-sm font-medium text-gray-500 dark:text-gray-400 text-center">
-        {set.isWarmup ? 'W' : setNumber}
+      <span
+        className={`text-sm font-medium text-center ${
+          set.isDropset
+            ? 'text-amber-700 dark:text-amber-300'
+            : 'text-gray-500 dark:text-gray-400'
+        }`}
+      >
+        {label}
       </span>
 
       <div>
@@ -72,10 +93,20 @@ export function SetRow({ setNumber, set, previous, onChange, onRemove }: SetRowP
         <input
           type="checkbox"
           checked={set.isWarmup}
-          onChange={(e) => onChange({ isWarmup: e.target.checked })}
+          onChange={(e) => toggleWarmup(e.target.checked)}
           className="rounded"
         />
         W
+      </label>
+
+      <label className="flex items-center gap-1 text-xs text-amber-700 dark:text-amber-400">
+        <input
+          type="checkbox"
+          checked={set.isDropset}
+          onChange={(e) => toggleDropset(e.target.checked)}
+          className="rounded"
+        />
+        D
       </label>
 
       <div className="flex items-center gap-1">

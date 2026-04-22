@@ -61,7 +61,7 @@ export async function getExerciseHistory(userId: string, exerciseId: string, pag
       workout: { userId },
     },
     include: {
-      workout: { select: { name: true, date: true } },
+      workout: { select: { id: true, name: true, date: true } },
       sets: { orderBy: { setNumber: 'asc' } },
     },
     orderBy: { workout: { date: 'desc' } },
@@ -69,26 +69,20 @@ export async function getExerciseHistory(userId: string, exerciseId: string, pag
     take: limit,
   });
 
-  const total = await prisma.workoutExercise.count({
-    where: { exerciseId, workout: { userId } },
-  });
-
-  return {
-    data: workoutExercises.map((we) => ({
-      date: we.workout.date.toISOString().split('T')[0],
-      workoutName: we.workout.name,
-      sets: we.sets.map((s) => ({
-        setNumber: s.setNumber,
-        weight: s.weight ? Number(s.weight) : null,
-        reps: s.reps,
-        rpe: s.rpe ? Number(s.rpe) : null,
-      })),
+  return workoutExercises.map((we) => ({
+    workoutId: we.workout.id,
+    date: we.workout.date.toISOString().split('T')[0],
+    workoutName: we.workout.name,
+    sets: we.sets.map((s) => ({
+      setNumber: s.setNumber,
+      weight: s.weight ? Number(s.weight) : null,
+      reps: s.reps,
+      rpe: s.rpe ? Number(s.rpe) : null,
+      isWarmup: s.isWarmup,
+      isDropset: s.isDropset,
+      isPr: s.isPr,
     })),
-    total,
-    page,
-    limit,
-    totalPages: Math.ceil(total / limit),
-  };
+  }));
 }
 
 export async function getExerciseRecords(userId: string, exerciseId: string) {

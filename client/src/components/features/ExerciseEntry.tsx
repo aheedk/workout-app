@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { SetRow, type SetData } from './SetRow';
+import { ExerciseHistoryModal } from './ExerciseHistoryModal';
 import { useExerciseHistory } from '../../api/exercises';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -32,6 +33,7 @@ const REST_OPTIONS: Array<{ value: number; label: string }> = [
 
 export function ExerciseEntry({ entry, onChange, onRemove, onSetComplete }: ExerciseEntryProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const { user } = useAuth();
   const unit = user?.unitPreference ?? 'kg';
   const { data: history } = useExerciseHistory(entry.exerciseId);
@@ -69,6 +71,26 @@ export function ExerciseEntry({ entry, onChange, onRemove, onSetComplete }: Exer
           reps: last?.reps ?? null,
           rpe: null,
           isWarmup: false,
+          isDropset: false,
+          completed: false,
+        },
+      ],
+    });
+  };
+
+  const handleAddDropset = () => {
+    const last = entry.sets[entry.sets.length - 1];
+    onChange({
+      ...entry,
+      sets: [
+        ...entry.sets,
+        {
+          // Start a drop at ~80% of last weight as a hint; user will adjust
+          weight: last?.weight != null ? Math.round(last.weight * 0.8 * 2) / 2 : null,
+          reps: null,
+          rpe: null,
+          isWarmup: false,
+          isDropset: true,
           completed: false,
         },
       ],
@@ -95,6 +117,13 @@ export function ExerciseEntry({ entry, onChange, onRemove, onSetComplete }: Exer
           )}
         </button>
         <div className="flex items-center gap-1 shrink-0">
+          <button
+            onClick={() => setHistoryOpen(true)}
+            className="text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-2 py-1 rounded"
+            title="View history"
+          >
+            History
+          </button>
           <RestSelect value={entry.restSeconds} onChange={handleRestChange} />
           <button
             onClick={onRemove}
@@ -107,11 +136,12 @@ export function ExerciseEntry({ entry, onChange, onRemove, onSetComplete }: Exer
 
       {!collapsed && (
         <>
-          <div className="grid grid-cols-[32px_1fr_1fr_1fr_auto_auto] gap-2 px-2 pb-1 text-xs font-medium text-gray-500 dark:text-gray-400">
+          <div className="grid grid-cols-[28px_1fr_1fr_1fr_auto_auto_auto] gap-2 px-2 pb-1 text-xs font-medium text-gray-500 dark:text-gray-400">
             <span className="text-center">#</span>
             <span>Weight</span>
             <span>Reps</span>
             <span>RPE</span>
+            <span></span>
             <span></span>
             <span></span>
           </div>
@@ -119,7 +149,11 @@ export function ExerciseEntry({ entry, onChange, onRemove, onSetComplete }: Exer
             {entry.sets.map((set, i) => (
               <SetRow
                 key={i}
-                setNumber={entry.sets.slice(0, i + 1).filter((s) => !s.isWarmup).length}
+                setNumber={
+                  entry.sets
+                    .slice(0, i + 1)
+                    .filter((s) => !s.isWarmup && !s.isDropset).length
+                }
                 set={set}
                 previous={previousBest ?? undefined}
                 onChange={(changes) => handleSetChange(i, changes)}
@@ -127,12 +161,21 @@ export function ExerciseEntry({ entry, onChange, onRemove, onSetComplete }: Exer
               />
             ))}
           </div>
-          <button
-            onClick={handleAddSet}
-            className="mt-2 w-full py-2 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg"
-          >
-            + Add Set
-          </button>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            <button
+              onClick={handleAddSet}
+              className="py-2 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg"
+            >
+              + Add Set
+            </button>
+            <button
+              onClick={handleAddDropset}
+              disabled={entry.sets.length === 0}
+              className="py-2 text-sm font-medium text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 disabled:opacity-50 rounded-lg"
+            >
+              + Drop
+            </button>
+          </div>
 
           <textarea
             value={entry.notes}
@@ -143,6 +186,13 @@ export function ExerciseEntry({ entry, onChange, onRemove, onSetComplete }: Exer
           />
         </>
       )}
+
+      <ExerciseHistoryModal
+        isOpen={historyOpen}
+        onClose={() => setHistoryOpen(false)}
+        exerciseId={entry.exerciseId}
+        exerciseName={entry.exerciseName}
+      />
     </div>
   );
 }

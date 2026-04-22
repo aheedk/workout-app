@@ -27,10 +27,21 @@ export interface CreateExerciseRequest {
   equipment?: Equipment;
 }
 
+export interface ExerciseHistorySet {
+  setNumber: number;
+  weight: number | null;
+  reps: number | null;
+  rpe: number | null;
+  isWarmup: boolean;
+  isDropset: boolean;
+  isPr: boolean;
+}
+
 export interface ExerciseHistory {
+  workoutId: string;
   date: string;
   workoutName: string;
-  sets: { setNumber: number; weight: number | null; reps: number | null; rpe: number | null }[];
+  sets: ExerciseHistorySet[];
 }
 
 export interface PersonalRecord {

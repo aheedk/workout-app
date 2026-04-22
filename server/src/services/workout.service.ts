@@ -27,6 +27,7 @@ function formatWorkout(w: any) {
         reps: s.reps,
         rpe: s.rpe ? Number(s.rpe) : null,
         isWarmup: s.isWarmup,
+        isDropset: s.isDropset,
         isPr: s.isPr,
       })),
     })),
@@ -141,6 +142,7 @@ export async function createWorkout(userId: string, data: CreateWorkoutRequest) 
               reps: s.reps ?? null,
               rpe: s.rpe ?? null,
               isWarmup: s.isWarmup ?? false,
+              isDropset: s.isDropset ?? false,
             })),
           },
         })),
@@ -190,6 +192,7 @@ export async function updateWorkout(userId: string, workoutId: string, data: Cre
               reps: s.reps ?? null,
               rpe: s.rpe ?? null,
               isWarmup: s.isWarmup ?? false,
+              isDropset: s.isDropset ?? false,
             })),
           },
         })),
@@ -238,7 +241,7 @@ export async function getCalendarData(userId: string, year: number, month: numbe
 
 async function detectAndUpdatePRs(userId: string, exerciseId: string, sets: any[], workoutDate: Date) {
   for (const set of sets) {
-    if (set.isWarmup) continue;
+    if (set.isWarmup || set.isDropset) continue;
     const weight = set.weight ? Number(set.weight) : 0;
     const reps = set.reps || 0;
     if (weight === 0 && reps === 0) continue;

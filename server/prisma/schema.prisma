@@ -148,6 +148,7 @@ model WorkoutSet {
   reps              Int?
   rpe               Decimal? @db.Decimal(3, 1)
   isWarmup          Boolean  @default(false) @map("is_warmup")
+  isDropset         Boolean  @default(false) @map("is_dropset")
   isPr              Boolean  @default(false) @map("is_pr")
 
   workoutExercise WorkoutExercise  @relation(fields: [workoutExerciseId], references: [id], onDelete: Cascade)
