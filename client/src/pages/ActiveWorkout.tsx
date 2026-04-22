@@ -20,7 +20,7 @@ export function ActiveWorkout() {
   const { showToast } = useToast();
 
   const [name, setName] = useState('');
-  const [exercises, setExercises] = useState<(ExerciseEntryData & { restSeconds?: number })[]>([]);
+  const [exercises, setExercises] = useState<ExerciseEntryData[]>([]);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [restTimer, setRestTimer] = useState<number | null>(null);
 
@@ -32,7 +32,7 @@ export function ActiveWorkout() {
           exerciseId: re.exerciseId,
           exerciseName: re.exerciseName,
           notes: '',
-          restSeconds: re.restSeconds,
+          restSeconds: re.restSeconds ?? 90,
           sets: Array.from({ length: re.defaultSets }, () => ({
             weight: re.defaultWeight,
             reps: re.defaultReps,
@@ -54,21 +54,22 @@ export function ActiveWorkout() {
         exerciseId: exercise.id,
         exerciseName: exercise.name,
         notes: '',
+        restSeconds: 90,
         sets: [{ weight: null, reps: null, rpe: null, isWarmup: false, completed: false }],
       },
     ]);
   };
 
   const handleUpdateExercise = (index: number, updated: ExerciseEntryData) => {
-    setExercises((prev) => prev.map((e, i) => (i === index ? { ...prev[i], ...updated } : e)));
+    setExercises((prev) => prev.map((e, i) => (i === index ? updated : e)));
   };
 
   const handleRemoveExercise = (index: number) => {
     setExercises((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSetComplete = (restSeconds?: number) => {
-    if (restSeconds && restSeconds > 0) {
+  const handleSetComplete = (restSeconds: number) => {
+    if (restSeconds > 0) {
       setRestTimer(restSeconds);
     }
   };
@@ -167,7 +168,6 @@ export function ActiveWorkout() {
           <ExerciseEntry
             key={`${entry.exerciseId}-${i}`}
             entry={entry}
-            defaultRestSeconds={entry.restSeconds}
             onChange={(updated) => handleUpdateExercise(i, updated)}
             onRemove={() => handleRemoveExercise(i)}
             onSetComplete={handleSetComplete}

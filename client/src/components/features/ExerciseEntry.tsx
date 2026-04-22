@@ -7,6 +7,7 @@ export interface ExerciseEntryData {
   exerciseId: string;
   exerciseName: string;
   notes: string;
+  restSeconds: number;
   sets: SetData[];
 }
 
@@ -14,17 +15,22 @@ interface ExerciseEntryProps {
   entry: ExerciseEntryData;
   onChange: (entry: ExerciseEntryData) => void;
   onRemove: () => void;
-  onSetComplete: (restSeconds?: number) => void;
-  defaultRestSeconds?: number;
+  onSetComplete: (restSeconds: number) => void;
 }
 
-export function ExerciseEntry({
-  entry,
-  onChange,
-  onRemove,
-  onSetComplete,
-  defaultRestSeconds,
-}: ExerciseEntryProps) {
+const REST_OPTIONS: Array<{ value: number; label: string }> = [
+  { value: 0, label: 'No rest' },
+  { value: 30, label: '30s' },
+  { value: 45, label: '45s' },
+  { value: 60, label: '60s' },
+  { value: 90, label: '90s' },
+  { value: 120, label: '2m' },
+  { value: 180, label: '3m' },
+  { value: 240, label: '4m' },
+  { value: 300, label: '5m' },
+];
+
+export function ExerciseEntry({ entry, onChange, onRemove, onSetComplete }: ExerciseEntryProps) {
   const [collapsed, setCollapsed] = useState(false);
   const { user } = useAuth();
   const unit = user?.unitPreference ?? 'kg';
@@ -48,7 +54,7 @@ export function ExerciseEntry({
 
     // If set just marked completed, trigger rest timer
     if (changes.completed === true && !entry.sets[index].completed) {
-      onSetComplete(defaultRestSeconds);
+      onSetComplete(entry.restSeconds);
     }
   };
 
@@ -73,6 +79,10 @@ export function ExerciseEntry({
     onChange({ ...entry, sets: entry.sets.filter((_, i) => i !== index) });
   };
 
+  const handleRestChange = (value: number) => {
+    onChange({ ...entry, restSeconds: value });
+  };
+
   return (
     <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
       <div className="flex items-start justify-between gap-2 mb-3">
@@ -84,12 +94,15 @@ export function ExerciseEntry({
             </p>
           )}
         </button>
-        <button
-          onClick={onRemove}
-          className="text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 px-2 py-1 rounded"
-        >
-          Remove
-        </button>
+        <div className="flex items-center gap-1 shrink-0">
+          <RestSelect value={entry.restSeconds} onChange={handleRestChange} />
+          <button
+            onClick={onRemove}
+            className="text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 px-2 py-1 rounded"
+          >
+            Remove
+          </button>
+        </div>
       </div>
 
       {!collapsed && (
@@ -131,5 +144,32 @@ export function ExerciseEntry({
         </>
       )}
     </div>
+  );
+}
+
+function RestSelect({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+  const isOff = !value;
+  return (
+    <label
+      className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded border cursor-pointer ${
+        isOff
+          ? 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400'
+          : 'border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+      }`}
+      title="Rest after each set"
+    >
+      <span aria-hidden>⏱</span>
+      <select
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="bg-transparent outline-none appearance-none pr-1 cursor-pointer"
+      >
+        {REST_OPTIONS.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }
