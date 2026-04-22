@@ -9,7 +9,7 @@ import { useGoals } from '../api/goals';
 import { useRoutines } from '../api/routines';
 import { useAuth } from '../hooks/useAuth';
 import { formatDuration, formatRelativeDate } from '../utils/formatting';
-import { BarChart, Bar, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
+import { BarChart, Bar, ResponsiveContainer, Tooltip } from 'recharts';
 
 export function Dashboard() {
   const { user } = useAuth();
@@ -64,33 +64,6 @@ export function Dashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
         <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-          <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Volume (last 6 weeks)</h3>
-          {volume && volume.length > 0 ? (
-            <div className="h-48">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={volume}>
-                  <XAxis
-                    dataKey="date"
-                    tickFormatter={(v) => new Date(v).toLocaleDateString('en', { month: 'short', day: 'numeric' })}
-                    tick={{ fontSize: 11, fill: '#9ca3af' }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <Tooltip
-                    contentStyle={{ backgroundColor: 'rgba(30,41,59,0.95)', border: 'none', borderRadius: 8, color: '#fff' }}
-                    formatter={(v: number) => [`${v.toLocaleString()} ${unit}`, 'Volume']}
-                    labelFormatter={(l) => new Date(l).toLocaleDateString()}
-                  />
-                  <Bar dataKey="volume" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          ) : (
-            <p className="text-gray-500 dark:text-gray-400 text-sm">No workout data yet</p>
-          )}
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
           <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Active Goals</h3>
           {goals && goals.filter((g) => g.isActive).length > 0 ? (
             <div className="space-y-3">
@@ -108,6 +81,32 @@ export function Dashboard() {
                 Create one
               </Link>
             </p>
+          )}
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Volume trend</h3>
+            <Link to="/analytics" className="text-xs text-blue-600 dark:text-blue-400 hover:underline">
+              Details
+            </Link>
+          </div>
+          {volume && volume.length > 0 ? (
+            <div className="h-20">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={volume} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+                  <Tooltip
+                    cursor={{ fill: 'rgba(59,130,246,0.1)' }}
+                    contentStyle={{ backgroundColor: 'rgba(30,41,59,0.95)', border: 'none', borderRadius: 8, color: '#fff', fontSize: 12 }}
+                    formatter={(v: number) => [`${v.toLocaleString()} ${unit}`, 'Volume']}
+                    labelFormatter={(l) => new Date(l).toLocaleDateString()}
+                  />
+                  <Bar dataKey="volume" fill="#3b82f6" radius={[2, 2, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <p className="text-xs text-gray-500 dark:text-gray-400 py-6 text-center">No data yet</p>
           )}
         </div>
       </div>
