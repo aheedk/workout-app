@@ -70,3 +70,27 @@ export function useExerciseRecords(id: string | undefined) {
 export function useAllRecords() {
   return useQuery({ queryKey: ['records'], queryFn: getAllRecords });
 }
+
+export interface BackfillResult {
+  workoutsScanned: number;
+  newPrs: number;
+  totalPrs: number;
+}
+
+async function backfillRecords(): Promise<BackfillResult> {
+  const res = await apiClient.post('/records/backfill');
+  return res.data;
+}
+
+export function useBackfillRecords() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: backfillRecords,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['records'] });
+      qc.invalidateQueries({ queryKey: ['exercise-records'] });
+      qc.invalidateQueries({ queryKey: ['exercise-history'] });
+      qc.invalidateQueries({ queryKey: ['workouts'] });
+    },
+  });
+}

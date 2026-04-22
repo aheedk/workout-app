@@ -12,7 +12,7 @@ import { useToast } from '../components/ui/Toast';
 import { useUpdateProfile, useChangePassword } from '../api/users';
 import { useBodyweightLogs, useLogBodyweight, useDeleteBodyweight } from '../api/bodyweight';
 import { useGoals, useCreateGoal, useDeleteGoal } from '../api/goals';
-import { useExercises } from '../api/exercises';
+import { useExercises, useBackfillRecords } from '../api/exercises';
 import { formatDate } from '../utils/formatting';
 import type { Goal, CreateGoalRequest } from '@workout-app/shared';
 
@@ -36,6 +36,7 @@ export function Profile() {
         <PasswordCard />
         <BodyweightCard unit={unit} />
         <GoalsCard unit={unit} />
+        <DataCard />
 
         <div className="flex items-center justify-between">
           <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -621,5 +622,40 @@ function CreateGoalModal({
         </div>
       </form>
     </Modal>
+  );
+}
+
+function DataCard() {
+  const { showToast } = useToast();
+  const backfill = useBackfillRecords();
+
+  const handleBackfill = async () => {
+    try {
+      const r = await backfill.mutateAsync();
+      showToast(
+        `Scanned ${r.workoutsScanned} workouts · ${r.totalPrs} PRs on file`,
+        'success'
+      );
+    } catch {
+      showToast('Failed to recompute PRs', 'error');
+    }
+  };
+
+  return (
+    <section className={CARD_CLASS}>
+      <h2 className="font-semibold text-gray-900 dark:text-white mb-2">Data</h2>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+        Walks every workout in date order and recomputes your personal records.
+        Use this if PRs are missing — e.g. after importing workouts or if the
+        database was restored.
+      </p>
+      <button
+        onClick={handleBackfill}
+        disabled={backfill.isPending}
+        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium rounded-lg"
+      >
+        {backfill.isPending ? 'Scanning…' : 'Recompute PRs'}
+      </button>
+    </section>
   );
 }

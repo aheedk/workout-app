@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import * as exerciseService from '../services/exercise.service';
+import * as workoutService from '../services/workout.service';
 
 export async function list(req: Request, res: Response, next: NextFunction) {
   try {
@@ -61,6 +62,15 @@ export async function records(req: Request, res: Response, next: NextFunction) {
 export async function allRecords(req: Request, res: Response, next: NextFunction) {
   try {
     const result = await exerciseService.getAllRecords(req.userId!);
+    return res.json(result);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function backfillRecords(req: Request, res: Response, next: NextFunction) {
+  try {
+    const result = await workoutService.backfillPRsForUser(req.userId!);
     return res.json(result);
   } catch (err) {
     next(err);

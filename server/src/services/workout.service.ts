@@ -239,6 +239,38 @@ export async function getCalendarData(userId: string, year: number, month: numbe
   }));
 }
 
+export async function backfillPRsForUser(userId: string) {
+  // Wipe the user's PRs and isPr flags, then replay every workout in date order.
+  await prisma.personalRecord.deleteMany({ where: { userId } });
+  await prisma.workoutSet.updateMany({
+    where: { workoutExercise: { workout: { userId } } },
+    data: { isPr: false },
+  });
+
+  const workouts = await prisma.workout.findMany({
+    where: { userId },
+    orderBy: [{ date: 'asc' }, { createdAt: 'asc' }],
+    include: {
+      exercises: {
+        include: { sets: { orderBy: { setNumber: 'asc' } } },
+      },
+    },
+  });
+
+  let prCount = 0;
+  for (const workout of workouts) {
+    for (const we of workout.exercises) {
+      const before = await prisma.personalRecord.count({ where: { userId, exerciseId: we.exerciseId } });
+      await detectAndUpdatePRs(userId, we.exerciseId, we.sets, workout.date);
+      const after = await prisma.personalRecord.count({ where: { userId, exerciseId: we.exerciseId } });
+      prCount += after - before;
+    }
+  }
+
+  const total = await prisma.personalRecord.count({ where: { userId } });
+  return { workoutsScanned: workouts.length, newPrs: prCount, totalPrs: total };
+}
+
 async function detectAndUpdatePRs(userId: string, exerciseId: string, sets: any[], workoutDate: Date) {
   for (const set of sets) {
     if (set.isWarmup || set.isDropset) continue;

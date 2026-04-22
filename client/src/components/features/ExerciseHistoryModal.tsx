@@ -2,8 +2,9 @@ import { Link } from 'react-router-dom';
 import { Modal } from '../ui/Modal';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { PRBadge } from './PRBadge';
-import { useExerciseHistory, useExerciseRecords } from '../../api/exercises';
+import { useExerciseHistory, useExerciseRecords, useBackfillRecords } from '../../api/exercises';
 import { useAuth } from '../../hooks/useAuth';
+import { useToast } from '../ui/Toast';
 import { formatDate } from '../../utils/formatting';
 import type { PersonalRecord } from '@workout-app/shared';
 
@@ -26,6 +27,20 @@ export function ExerciseHistoryModal({ isOpen, onClose, exerciseId, exerciseName
   const unit = user?.unitPreference ?? 'kg';
   const { data: history, isLoading } = useExerciseHistory(exerciseId);
   const { data: records } = useExerciseRecords(exerciseId);
+  const backfill = useBackfillRecords();
+  const { showToast } = useToast();
+
+  const handleBackfill = async () => {
+    try {
+      const r = await backfill.mutateAsync();
+      showToast(`Scanned ${r.workoutsScanned} workouts · found ${r.totalPrs} PRs`, 'success');
+    } catch {
+      showToast('Backfill failed', 'error');
+    }
+  };
+
+  const hasHistory = history && history.length > 0;
+  const hasRecords = records && records.length > 0;
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={exerciseName} size="lg">
@@ -35,11 +50,22 @@ export function ExerciseHistoryModal({ isOpen, onClose, exerciseId, exerciseName
         </div>
       ) : (
         <div className="space-y-5">
-          {records && records.length > 0 && (
-            <section>
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">
+          <section>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                 Personal Records
               </h3>
+              {hasHistory && !hasRecords && (
+                <button
+                  onClick={handleBackfill}
+                  disabled={backfill.isPending}
+                  className="text-xs text-blue-600 dark:text-blue-400 hover:underline disabled:opacity-60"
+                >
+                  {backfill.isPending ? 'Scanning…' : 'Scan for PRs'}
+                </button>
+              )}
+            </div>
+            {hasRecords ? (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {records.map((pr) => (
                   <div
@@ -54,8 +80,18 @@ export function ExerciseHistoryModal({ isOpen, onClose, exerciseId, exerciseName
                   </div>
                 ))}
               </div>
-            </section>
-          )}
+            ) : hasHistory ? (
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                No PRs recorded yet for this exercise. Click{' '}
+                <span className="text-blue-600 dark:text-blue-400">Scan for PRs</span>{' '}
+                to compute them from your past workouts.
+              </p>
+            ) : (
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                PRs will appear here once you log some sets.
+              </p>
+            )}
+          </section>
 
           <section>
             <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">

@@ -36,5 +36,6 @@ app.use('/api/analytics', authenticate, analyticsRoutes);
 
 // All user PRs endpoint
 app.get('/api/records', authenticate, exerciseController.allRecords);
+app.post('/api/records/backfill', authenticate, exerciseController.backfillRecords);
 
 app.use(errorHandler);
