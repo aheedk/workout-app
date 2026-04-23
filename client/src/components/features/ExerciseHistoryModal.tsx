@@ -1,4 +1,6 @@
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { Modal } from '../ui/Modal';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { PRBadge } from './PRBadge';
@@ -6,7 +8,7 @@ import { useExerciseHistory, useExerciseRecords, useBackfillRecords } from '../.
 import { useAuth } from '../../hooks/useAuth';
 import { useToast } from '../ui/Toast';
 import { formatDate } from '../../utils/formatting';
-import type { PersonalRecord } from '@workout-app/shared';
+import type { ExerciseHistory, PersonalRecord } from '@workout-app/shared';
 
 interface ExerciseHistoryModalProps {
   isOpen: boolean;
@@ -92,6 +94,8 @@ export function ExerciseHistoryModal({ isOpen, onClose, exerciseId, exerciseName
               </p>
             )}
           </section>
+
+          {hasHistory && <ProgressGraph history={history} unit={unit} />}
 
           <section>
             <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">
@@ -189,4 +193,137 @@ function formatRecordValue(pr: PersonalRecord, unit: 'kg' | 'lb'): string {
     case 'max_volume':
       return `${pr.value.toLocaleString()} ${unit}`;
   }
+}
+
+type Metric = 'est_1rm' | 'top_weight' | 'top_volume' | 'total_volume' | 'top_reps';
+
+const METRIC_OPTIONS: { value: Metric; label: string }[] = [
+  { value: 'est_1rm', label: 'Est. 1RM' },
+  { value: 'top_weight', label: 'Top weight' },
+  { value: 'top_volume', label: 'Top set volume' },
+  { value: 'total_volume', label: 'Total volume' },
+  { value: 'top_reps', label: 'Top reps' },
+];
+
+function computeMetric(session: ExerciseHistory, metric: Metric): number | null {
+  const workSets = session.sets.filter((s) => !s.isWarmup);
+  const nonDrop = workSets.filter((s) => !s.isDropset);
+
+  let v = 0;
+  switch (metric) {
+    case 'est_1rm':
+      v = nonDrop.reduce((m, s) => {
+        if (s.weight == null || s.reps == null) return m;
+        const e1rm = s.weight * (1 + s.reps / 30);
+        return e1rm > m ? e1rm : m;
+      }, 0);
+      break;
+    case 'top_weight':
+      v = nonDrop.reduce((m, s) => (s.weight != null && s.weight > m ? s.weight : m), 0);
+      break;
+    case 'top_volume':
+      v = nonDrop.reduce((m, s) => {
+        if (s.weight == null || s.reps == null) return m;
+        const vol = s.weight * s.reps;
+        return vol > m ? vol : m;
+      }, 0);
+      break;
+    case 'total_volume':
+      v = workSets.reduce((sum, s) => {
+        if (s.weight == null || s.reps == null) return sum;
+        return sum + s.weight * s.reps;
+      }, 0);
+      break;
+    case 'top_reps':
+      v = nonDrop.reduce((m, s) => (s.reps != null && s.reps > m ? s.reps : m), 0);
+      break;
+  }
+  return v > 0 ? Math.round(v * 100) / 100 : null;
+}
+
+function metricSuffix(metric: Metric, unit: 'kg' | 'lb'): string {
+  if (metric === 'top_reps') return 'reps';
+  return unit;
+}
+
+function ProgressGraph({ history, unit }: { history: ExerciseHistory[]; unit: 'kg' | 'lb' }) {
+  const [metric, setMetric] = useState<Metric>('est_1rm');
+
+  const data = useMemo(() => {
+    return history
+      .slice()
+      .reverse() // history is newest-first; chart left→right in chronological order
+      .map((s) => ({ date: s.date, value: computeMetric(s, metric) }))
+      .filter((d): d is { date: string; value: number } => d.value != null);
+  }, [history, metric]);
+
+  const suffix = metricSuffix(metric, unit);
+
+  return (
+    <section>
+      <div className="flex items-center justify-between gap-2 mb-2">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+          Progress
+        </h3>
+        <select
+          value={metric}
+          onChange={(e) => setMetric(e.target.value as Metric)}
+          className="text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+        >
+          {METRIC_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+      </div>
+      {data.length < 2 ? (
+        <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-6">
+          Log at least two sessions to see a trend.
+        </p>
+      ) : (
+        <div className="h-48">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={data} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:opacity-20" />
+              <XAxis
+                dataKey="date"
+                tickFormatter={(v) =>
+                  new Date(v).toLocaleDateString('en', { month: 'short', day: 'numeric' })
+                }
+                tick={{ fontSize: 10, fill: '#9ca3af' }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                tick={{ fontSize: 10, fill: '#9ca3af' }}
+                axisLine={false}
+                tickLine={false}
+                width={40}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: 'rgba(30,41,59,0.95)',
+                  border: 'none',
+                  borderRadius: 8,
+                  color: '#fff',
+                  fontSize: 12,
+                }}
+                formatter={(v: number) => [`${v.toLocaleString()} ${suffix}`, METRIC_OPTIONS.find((o) => o.value === metric)?.label]}
+                labelFormatter={(l) => new Date(l).toLocaleDateString()}
+              />
+              <Line
+                type="monotone"
+                dataKey="value"
+                stroke="#3b82f6"
+                strokeWidth={2}
+                dot={{ r: 3, fill: '#3b82f6' }}
+                activeDot={{ r: 5 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+    </section>
+  );
 }
