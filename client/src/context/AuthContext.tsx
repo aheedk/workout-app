@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import type { AuthResponse } from '@workout-app/shared';
 import * as authApi from '../api/auth';
 import { setAccessToken } from '../api/client';
@@ -23,13 +24,20 @@ export interface AuthContextType {
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const queryClient = useQueryClient();
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const handleAuthResponse = useCallback((data: AuthResponse) => {
-    setAccessToken(data.accessToken);
-    setUser(data.user);
-  }, []);
+  const handleAuthResponse = useCallback(
+    (data: AuthResponse) => {
+      // Drop any cached data from a prior auth identity before the new
+      // session's queries start populating it.
+      queryClient.clear();
+      setAccessToken(data.accessToken);
+      setUser(data.user);
+    },
+    [queryClient]
+  );
 
   useEffect(() => {
     authApi
@@ -42,6 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             .get('/users/me')
             .then((res) => setUser(res.data))
             .catch(() => {
+              queryClient.clear();
               setAccessToken(null);
               setUser(null);
             })
@@ -49,9 +58,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
       })
       .catch(() => {
+        // PWAs keep the JS context alive across reopens, so the cache can
+        // outlive a logged-out state. Clear it so the next login can't see
+        // the previous user's data.
+        queryClient.clear();
         setIsLoading(false);
       });
-  }, []);
+  }, [queryClient]);
 
   const login = useCallback(
     async (email: string, password: string) => {
@@ -71,9 +84,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logoutFn = useCallback(async () => {
     await authApi.logout();
+    queryClient.clear();
     setAccessToken(null);
     setUser(null);
-  }, []);
+  }, [queryClient]);
 
   const updateUser = useCallback((updatedUser: AuthUser) => {
     setUser(updatedUser);
