@@ -136,12 +136,10 @@ export function ExerciseEntry({ entry, onChange, onRemove, onSetComplete }: Exer
 
       {!collapsed && (
         <>
-          <div className="grid grid-cols-[24px_1fr_1fr_auto_auto_auto] gap-1.5 px-2 pb-1 text-xs font-medium text-gray-500 dark:text-gray-400">
+          <div className="grid grid-cols-[20px_1fr_1fr_auto] gap-2 pb-1 text-xs font-medium text-gray-500 dark:text-gray-400">
             <span className="text-center">#</span>
             <span>Weight</span>
             <span>Reps</span>
-            <span></span>
-            <span></span>
             <span></span>
           </div>
           <div className="space-y-1">

@@ -34,20 +34,27 @@ apiClient.interceptors.response.use(
 
       // Queue concurrent requests during refresh
       if (!refreshPromise) {
-        refreshPromise = apiClient
-          .post('/auth/refresh')
-          .then((res) => {
-            const newToken = res.data.accessToken;
+        refreshPromise = (async () => {
+          // Lazy import to avoid a circular module load between client.ts and auth.ts.
+          const { getStoredRefreshToken, setStoredRefreshToken } = await import('./auth');
+          const stored = getStoredRefreshToken();
+          try {
+            const res = await apiClient.post(
+              '/auth/refresh',
+              stored ? { refreshToken: stored } : {}
+            );
+            const newToken: string = res.data.accessToken;
             setAccessToken(newToken);
+            if (res.data.refreshToken) setStoredRefreshToken(res.data.refreshToken);
             return newToken;
-          })
-          .catch(() => {
+          } catch {
             setAccessToken(null);
+            setStoredRefreshToken(null);
             return null;
-          })
-          .finally(() => {
-            refreshPromise = null;
-          });
+          }
+        })().finally(() => {
+          refreshPromise = null;
+        });
       }
 
       const newToken = await refreshPromise;

@@ -18,6 +18,7 @@ export interface AuthResponse {
     theme: 'light' | 'dark' | 'system';
   };
   accessToken: string;
+  refreshToken: string;
 }
 
 export interface JwtPayload {

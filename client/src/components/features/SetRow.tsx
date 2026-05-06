@@ -38,20 +38,18 @@ export function SetRow({ setNumber, set, previous, onChange, onRemove }: SetRowP
   };
 
   return (
-    <div
-      className={`grid grid-cols-[24px_1fr_1fr_auto_auto_auto] gap-1.5 items-center py-2 px-2 rounded ${bgClass}`}
-    >
-      <span
-        className={`text-sm font-medium text-center ${
-          set.isDropset
-            ? 'text-amber-700 dark:text-amber-300'
-            : 'text-gray-500 dark:text-gray-400'
-        }`}
-      >
-        {label}
-      </span>
+    <div className={`py-2 rounded ${bgClass}`}>
+      <div className="grid grid-cols-[20px_1fr_1fr_auto] gap-2 items-center">
+        <span
+          className={`text-sm font-medium text-center ${
+            set.isDropset
+              ? 'text-amber-700 dark:text-amber-300'
+              : 'text-gray-500 dark:text-gray-400'
+          }`}
+        >
+          {label}
+        </span>
 
-      <div>
         <input
           type="number"
           value={set.weight ?? ''}
@@ -61,9 +59,7 @@ export function SetRow({ setNumber, set, previous, onChange, onRemove }: SetRowP
           min={0}
           className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none"
         />
-      </div>
 
-      <div>
         <input
           type="number"
           value={set.reps ?? ''}
@@ -72,47 +68,49 @@ export function SetRow({ setNumber, set, previous, onChange, onRemove }: SetRowP
           min={0}
           className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none"
         />
+
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => onChange({ completed: !set.completed })}
+            className={`w-7 h-7 rounded flex items-center justify-center ${
+              set.completed
+                ? 'bg-green-600 text-white'
+                : 'bg-gray-100 dark:bg-gray-700 text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+            }`}
+            aria-label="Complete set"
+          >
+            ✓
+          </button>
+          <button
+            onClick={onRemove}
+            className="w-7 h-7 rounded text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 flex items-center justify-center text-lg leading-none"
+            aria-label="Remove set"
+          >
+            ×
+          </button>
+        </div>
       </div>
 
-      <label className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
-        <input
-          type="checkbox"
-          checked={set.isWarmup}
-          onChange={(e) => toggleWarmup(e.target.checked)}
-          className="rounded"
-        />
-        W
-      </label>
+      <div className="flex items-center gap-4 pl-7 pt-1.5">
+        <label className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+          <input
+            type="checkbox"
+            checked={set.isWarmup}
+            onChange={(e) => toggleWarmup(e.target.checked)}
+            className="rounded"
+          />
+          Warmup
+        </label>
 
-      <label className="flex items-center gap-1 text-xs text-amber-700 dark:text-amber-400">
-        <input
-          type="checkbox"
-          checked={set.isDropset}
-          onChange={(e) => toggleDropset(e.target.checked)}
-          className="rounded"
-        />
-        D
-      </label>
-
-      <div className="flex items-center gap-1">
-        <button
-          onClick={() => onChange({ completed: !set.completed })}
-          className={`w-7 h-7 rounded flex items-center justify-center ${
-            set.completed
-              ? 'bg-green-600 text-white'
-              : 'bg-gray-100 dark:bg-gray-700 text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
-          }`}
-          aria-label="Complete set"
-        >
-          ✓
-        </button>
-        <button
-          onClick={onRemove}
-          className="w-7 h-7 rounded text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 flex items-center justify-center text-lg leading-none"
-          aria-label="Remove set"
-        >
-          ×
-        </button>
+        <label className="flex items-center gap-1 text-xs text-amber-700 dark:text-amber-400">
+          <input
+            type="checkbox"
+            checked={set.isDropset}
+            onChange={(e) => toggleDropset(e.target.checked)}
+            className="rounded"
+          />
+          Dropset
+        </label>
       </div>
     </div>
   );
