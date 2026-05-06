@@ -39,7 +39,7 @@ export function SetRow({ setNumber, set, previous, onChange, onRemove }: SetRowP
 
   return (
     <div
-      className={`grid grid-cols-[28px_1fr_1fr_1fr_auto_auto_auto] gap-2 items-center py-2 px-2 rounded ${bgClass}`}
+      className={`grid grid-cols-[24px_1fr_1fr_auto_auto_auto] gap-1.5 items-center py-2 px-2 rounded ${bgClass}`}
     >
       <span
         className={`text-sm font-medium text-center ${
@@ -72,21 +72,6 @@ export function SetRow({ setNumber, set, previous, onChange, onRemove }: SetRowP
           min={0}
           className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none"
         />
-      </div>
-
-      <div>
-        <select
-          value={set.rpe ?? ''}
-          onChange={(e) => onChange({ rpe: e.target.value === '' ? null : parseInt(e.target.value) })}
-          className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-        >
-          <option value="">RPE</option>
-          {[6, 7, 8, 9, 10].map((n) => (
-            <option key={n} value={n}>
-              {n}
-            </option>
-          ))}
-        </select>
       </div>
 
       <label className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
