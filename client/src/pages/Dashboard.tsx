@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '../components/ui/PageHeader';
 import { StatCard } from '../components/ui/StatCard';
@@ -11,7 +12,8 @@ import { useGoals } from '../api/goals';
 import { useRoutines } from '../api/routines';
 import { useWorkouts } from '../api/workouts';
 import { useAuth } from '../hooks/useAuth';
-import { formatDuration, formatRelativeDate } from '../utils/formatting';
+import { formatDuration, formatDurationTimer, formatRelativeDate } from '../utils/formatting';
+import { loadActiveWorkout, type ActiveWorkoutSnapshot } from '../utils/activeWorkoutStorage';
 import { BarChart, Bar, ResponsiveContainer, Tooltip } from 'recharts';
 
 export function Dashboard() {
@@ -26,6 +28,21 @@ export function Dashboard() {
   const unit = user?.unitPreference ?? 'kg';
   const favorites = routines?.filter((r) => r.isFavorite).slice(0, 3) ?? [];
   const recent = recentList?.data?.[0];
+
+  // Pick up a paused in-progress workout from localStorage. Re-read on focus
+  // so the banner appears immediately when the user returns to the app.
+  const [paused, setPaused] = useState<ActiveWorkoutSnapshot | null>(() => loadActiveWorkout());
+  useEffect(() => {
+    const refresh = () => setPaused(loadActiveWorkout());
+    window.addEventListener('focus', refresh);
+    window.addEventListener('storage', refresh);
+    document.addEventListener('visibilitychange', refresh);
+    return () => {
+      window.removeEventListener('focus', refresh);
+      window.removeEventListener('storage', refresh);
+      document.removeEventListener('visibilitychange', refresh);
+    };
+  }, []);
 
   if (loadingSummary) {
     return (
@@ -42,12 +59,16 @@ export function Dashboard() {
         action={
           <Link
             to="/workouts/active"
-            className="px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm sm:text-base font-medium rounded-lg whitespace-nowrap"
+            className={`px-3 sm:px-4 py-2 text-white text-sm sm:text-base font-medium rounded-lg whitespace-nowrap ${
+              paused ? 'bg-amber-600 hover:bg-amber-700' : 'bg-blue-600 hover:bg-blue-700'
+            }`}
           >
-            Start Workout
+            {paused ? 'Resume Workout' : 'Start Workout'}
           </Link>
         }
       />
+
+      {paused && <PausedWorkoutBanner paused={paused} />}
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard label="This Week" value={summary?.workoutsThisWeek ?? 0} subtext="workouts" />
@@ -221,5 +242,31 @@ function Stat({ label, value }: { label: string; value: string | number }) {
       <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
       <p className="font-medium text-gray-900 dark:text-white text-sm">{value}</p>
     </div>
+  );
+}
+
+function PausedWorkoutBanner({ paused }: { paused: ActiveWorkoutSnapshot }) {
+  const elapsedSeconds = Math.max(0, Math.floor((Date.now() - paused.startedAt) / 1000));
+  const setCount = paused.exercises.reduce((sum, e) => sum + e.sets.length, 0);
+  return (
+    <Link
+      to="/workouts/active"
+      className="mt-4 block rounded-xl border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 px-4 py-3 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors"
+    >
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-amber-900 dark:text-amber-100 truncate">
+            Paused: {paused.name}
+          </p>
+          <p className="text-xs text-amber-800/80 dark:text-amber-200/70 mt-0.5">
+            {paused.exercises.length} exercise{paused.exercises.length === 1 ? '' : 's'} · {setCount} set
+            {setCount === 1 ? '' : 's'} · {formatDurationTimer(elapsedSeconds)}
+          </p>
+        </div>
+        <span className="shrink-0 text-sm font-medium text-amber-700 dark:text-amber-300">
+          Resume →
+        </span>
+      </div>
+    </Link>
   );
 }

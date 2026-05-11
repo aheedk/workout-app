@@ -58,13 +58,20 @@ export function useTimer(initialSeconds: number) {
   return { seconds, isRunning, start, pause, reset };
 }
 
-export function useElapsedTimer() {
-  const [elapsed, setElapsed] = useState(0);
-  const startRef = useRef<number>(Date.now());
+export function useElapsedTimer(startedAt?: number) {
+  const startRef = useRef<number>(startedAt ?? Date.now());
+  const [elapsed, setElapsed] = useState(() =>
+    Math.max(0, Math.floor((Date.now() - startRef.current) / 1000))
+  );
+
+  useEffect(() => {
+    if (startedAt != null) startRef.current = startedAt;
+    setElapsed(Math.max(0, Math.floor((Date.now() - startRef.current) / 1000)));
+  }, [startedAt]);
 
   useEffect(() => {
     const i = setInterval(() => {
-      setElapsed(Math.floor((Date.now() - startRef.current) / 1000));
+      setElapsed(Math.max(0, Math.floor((Date.now() - startRef.current) / 1000)));
     }, 1000);
     return () => clearInterval(i);
   }, []);

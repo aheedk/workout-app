@@ -1,15 +1,29 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '../components/ui/PageHeader';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { EmptyState } from '../components/ui/EmptyState';
 import { WorkoutCard } from '../components/features/WorkoutCard';
 import { useWorkouts } from '../api/workouts';
+import { hasActiveWorkout } from '../utils/activeWorkoutStorage';
 
 export function WorkoutHistory() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
+  const [paused, setPaused] = useState(() => hasActiveWorkout());
+
+  useEffect(() => {
+    const refresh = () => setPaused(hasActiveWorkout());
+    window.addEventListener('focus', refresh);
+    window.addEventListener('storage', refresh);
+    document.addEventListener('visibilitychange', refresh);
+    return () => {
+      window.removeEventListener('focus', refresh);
+      window.removeEventListener('storage', refresh);
+      document.removeEventListener('visibilitychange', refresh);
+    };
+  }, []);
 
   const { data, isLoading } = useWorkouts({ page, limit: 10, search: search || undefined });
 
@@ -26,9 +40,11 @@ export function WorkoutHistory() {
         action={
           <Link
             to="/workouts/active"
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg"
+            className={`px-4 py-2 text-white font-medium rounded-lg ${
+              paused ? 'bg-amber-600 hover:bg-amber-700' : 'bg-blue-600 hover:bg-blue-700'
+            }`}
           >
-            New Workout
+            {paused ? 'Resume Workout' : 'New Workout'}
           </Link>
         }
       />

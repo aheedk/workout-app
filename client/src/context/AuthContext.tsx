@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { AuthResponse } from '@workout-app/shared';
 import * as authApi from '../api/auth';
 import { setAccessToken } from '../api/client';
+import { clearActiveWorkout } from '../utils/activeWorkoutStorage';
 
 interface AuthUser {
   id: string;
@@ -85,6 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logoutFn = useCallback(async () => {
     await authApi.logout();
     queryClient.clear();
+    clearActiveWorkout();
     setAccessToken(null);
     setUser(null);
   }, [queryClient]);

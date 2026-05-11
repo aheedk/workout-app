@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { PageHeader } from '../components/ui/PageHeader';
 import { ExercisePicker } from '../components/features/ExercisePicker';
@@ -8,6 +8,11 @@ import { useCreateWorkout } from '../api/workouts';
 import { useToast } from '../components/ui/Toast';
 import { useElapsedTimer } from '../hooks/useTimer';
 import { formatDurationTimer } from '../utils/formatting';
+import {
+  clearActiveWorkout,
+  loadActiveWorkout,
+  saveActiveWorkout,
+} from '../utils/activeWorkoutStorage';
 import type { Exercise, Routine, CreateWorkoutRequest } from '@workout-app/shared';
 
 export function ActiveWorkout() {
@@ -15,38 +20,84 @@ export function ActiveWorkout() {
   const location = useLocation();
   const routineState = (location.state as { routine?: Routine } | null)?.routine;
 
-  const elapsed = useElapsedTimer();
+  // Decide once on first render whether we're resuming a paused session or
+  // starting fresh. After that, state lives in React + localStorage.
+  const initialRef = useRef<{
+    name: string;
+    exercises: ExerciseEntryData[];
+    startedAt: number;
+  } | null>(null);
+
+  if (initialRef.current === null) {
+    const persisted = loadActiveWorkout();
+    if (routineState) {
+      // The user explicitly chose a routine — discard any paused session.
+      if (persisted) {
+        const ok = window.confirm(
+          'You have a paused workout in progress. Discard it and start this routine?'
+        );
+        if (!ok) {
+          // Resume the paused session instead.
+          initialRef.current = {
+            name: persisted.name,
+            exercises: persisted.exercises,
+            startedAt: persisted.startedAt,
+          };
+        }
+      }
+      if (initialRef.current === null) {
+        clearActiveWorkout();
+        initialRef.current = {
+          name: routineState.name,
+          exercises: routineState.exercises.map((re) => ({
+            exerciseId: re.exerciseId,
+            exerciseName: re.exerciseName,
+            notes: '',
+            restSeconds: re.restSeconds ?? 90,
+            sets: Array.from({ length: re.defaultSets }, () => ({
+              weight: re.defaultWeight,
+              reps: re.defaultReps,
+              rpe: null,
+              isWarmup: false,
+              isDropset: false,
+              completed: false,
+            })),
+          })),
+          startedAt: Date.now(),
+        };
+      }
+    } else if (persisted) {
+      initialRef.current = {
+        name: persisted.name,
+        exercises: persisted.exercises,
+        startedAt: persisted.startedAt,
+      };
+    } else {
+      initialRef.current = {
+        name: `Workout ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`,
+        exercises: [],
+        startedAt: Date.now(),
+      };
+    }
+  }
+
+  const initial = initialRef.current;
+  const elapsed = useElapsedTimer(initial.startedAt);
   const createWorkout = useCreateWorkout();
   const { showToast } = useToast();
 
-  const [name, setName] = useState('');
-  const [exercises, setExercises] = useState<ExerciseEntryData[]>([]);
+  const [name, setName] = useState(initial.name);
+  const [exercises, setExercises] = useState<ExerciseEntryData[]>(initial.exercises);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [restTimer, setRestTimer] = useState<number | null>(null);
 
+  // Persist on every change so swiping the app away mid-workout doesn't lose it.
+  // Only persist once the workout has at least one exercise — opening the page
+  // and immediately backing out shouldn't leave a stale "Resume" banner.
   useEffect(() => {
-    if (routineState) {
-      setName(routineState.name);
-      setExercises(
-        routineState.exercises.map((re) => ({
-          exerciseId: re.exerciseId,
-          exerciseName: re.exerciseName,
-          notes: '',
-          restSeconds: re.restSeconds ?? 90,
-          sets: Array.from({ length: re.defaultSets }, () => ({
-            weight: re.defaultWeight,
-            reps: re.defaultReps,
-            rpe: null,
-            isWarmup: false,
-            isDropset: false,
-            completed: false,
-          })),
-        }))
-      );
-    } else {
-      setName(`Workout ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`);
-    }
-  }, [routineState]);
+    if (exercises.length === 0) return;
+    saveActiveWorkout({ name, exercises, startedAt: initial.startedAt });
+  }, [name, exercises, initial.startedAt]);
 
   const handleAddExercise = (exercise: Exercise) => {
     setExercises((prev) => [
@@ -113,6 +164,7 @@ export function ActiveWorkout() {
 
     try {
       const workout = await createWorkout.mutateAsync(data);
+      clearActiveWorkout();
       showToast('Workout saved!', 'success');
       navigate(`/workouts/${workout.id}`);
     } catch {
@@ -122,6 +174,7 @@ export function ActiveWorkout() {
 
   const handleCancel = () => {
     if (confirm('Discard this workout?')) {
+      clearActiveWorkout();
       navigate('/workouts');
     }
   };
