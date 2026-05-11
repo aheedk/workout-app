@@ -89,7 +89,11 @@ export function ActiveWorkout() {
   const [name, setName] = useState(initial.name);
   const [exercises, setExercises] = useState<ExerciseEntryData[]>(initial.exercises);
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [restTimer, setRestTimer] = useState<number | null>(null);
+  const [restTimer, setRestTimer] = useState<{
+    seconds: number;
+    exerciseName?: string;
+    setLabel?: string;
+  } | null>(null);
 
   // Persist on every change so swiping the app away mid-workout doesn't lose it.
   // Only persist once the workout has at least one exercise — opening the page
@@ -120,9 +124,17 @@ export function ActiveWorkout() {
     setExercises((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSetComplete = (restSeconds: number) => {
-    if (restSeconds > 0) {
-      setRestTimer(restSeconds);
+  const handleSetComplete = (ctx: {
+    restSeconds: number;
+    exerciseName: string;
+    setLabel: string;
+  }) => {
+    if (ctx.restSeconds > 0) {
+      setRestTimer({
+        seconds: ctx.restSeconds,
+        exerciseName: ctx.exerciseName,
+        setLabel: ctx.setLabel,
+      });
     }
   };
 
@@ -238,7 +250,7 @@ export function ActiveWorkout() {
 
         <div className="flex gap-2 pt-2">
           <button
-            onClick={() => setRestTimer(90)}
+            onClick={() => setRestTimer({ seconds: 90 })}
             className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium"
           >
             Start Rest Timer
@@ -252,7 +264,14 @@ export function ActiveWorkout() {
         onSelect={handleAddExercise}
       />
 
-      {restTimer != null && <RestTimer seconds={restTimer} onClose={() => setRestTimer(null)} />}
+      {restTimer != null && (
+        <RestTimer
+          seconds={restTimer.seconds}
+          exerciseName={restTimer.exerciseName}
+          setLabel={restTimer.setLabel}
+          onClose={() => setRestTimer(null)}
+        />
+      )}
     </div>
   );
 }

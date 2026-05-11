@@ -1,30 +1,89 @@
+import { useEffect, useRef } from 'react';
 import { useTimer } from '../../hooks/useTimer';
 import { formatDurationTimer } from '../../utils/formatting';
-import { useEffect } from 'react';
+import {
+  clearRestNotification,
+  ensureNotificationPermission,
+  showRestNotification,
+} from '../../utils/notifications';
 
 interface RestTimerProps {
   seconds: number;
+  exerciseName?: string;
+  setLabel?: string;
   onClose: () => void;
 }
 
 const PRESETS = [30, 60, 90, 120, 180];
 
-export function RestTimer({ seconds, onClose }: RestTimerProps) {
-  const { seconds: remaining, isRunning, start, pause, reset } = useTimer(seconds);
+export function RestTimer({ seconds, exerciseName, setLabel, onClose }: RestTimerProps) {
+  const { seconds: remaining, isRunning, start, pause, reset, setOnComplete } = useTimer(seconds);
 
   useEffect(() => {
     start();
   }, [start, seconds]);
 
+  // Ask for permission once on first mount. iOS only honors this when the
+  // call comes from a user gesture chain — completing a set or opening the
+  // timer manually counts, so we ride that gesture here.
+  useEffect(() => {
+    void ensureNotificationPermission();
+  }, []);
+
+  // Surface the rest as a system notification while the timer is running so
+  // the user can leave the app (lock the phone, switch tabs) and still see
+  // / tap back when rest is up. Re-show every ~10s while running because
+  // notifications can't be edited — only replaced via the same tag.
+  const lastShownAtRef = useRef<number>(0);
+  useEffect(() => {
+    if (!isRunning) return;
+    const title = exerciseName
+      ? `${exerciseName}${setLabel ? ` · set ${setLabel}` : ''}`
+      : 'Workout';
+    const body = remaining > 0 ? `Rest ${formatDurationTimer(remaining)} — tap to return` : 'Rest done';
+    const now = Date.now();
+    if (now - lastShownAtRef.current >= 10_000 || remaining <= 5) {
+      lastShownAtRef.current = now;
+      void showRestNotification({ title, body, url: '/workouts/active' });
+    }
+  }, [isRunning, remaining, exerciseName, setLabel]);
+
+  // When the timer hits zero, replace the running notification with a "done"
+  // banner that sticks until dismissed. setOnComplete fires exactly once.
+  useEffect(() => {
+    setOnComplete(() => {
+      const title = exerciseName ? `Rest done — ${exerciseName}` : 'Rest done';
+      void showRestNotification({
+        title,
+        body: 'Tap to return to your workout',
+        url: '/workouts/active',
+        requireInteraction: true,
+      });
+    });
+    return () => setOnComplete(null);
+  }, [setOnComplete, exerciseName]);
+
+  // Clear lingering notifications when the timer is closed entirely.
+  useEffect(() => {
+    return () => {
+      void clearRestNotification();
+    };
+  }, []);
+
   const pct = seconds > 0 ? (remaining / seconds) * 100 : 0;
   const done = remaining === 0;
+
+  const handleClose = () => {
+    void clearRestNotification();
+    onClose();
+  };
 
   return (
     <div className="fixed bottom-20 lg:bottom-4 left-1/2 -translate-x-1/2 z-40 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 p-4 w-80">
       <div className="flex items-start justify-between mb-3">
         <h3 className="font-semibold text-gray-900 dark:text-white">Rest Timer</h3>
         <button
-          onClick={onClose}
+          onClick={handleClose}
           className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-xl leading-none"
           aria-label="Close"
         >

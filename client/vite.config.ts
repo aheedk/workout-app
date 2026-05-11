@@ -30,6 +30,9 @@ export default defineConfig({
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api/],
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
+        // Pull in our notificationclick handler so tapping a rest-timer
+        // notification focuses (or opens) the active workout page.
+        importScripts: ['sw-notifications.js'],
         // Don't cache cross-origin API requests — they're authenticated and
         // time-sensitive; leave them to the network so the app sees fresh
         // workout data and cookie-based auth flows aren't stale.

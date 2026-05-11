@@ -16,7 +16,7 @@ interface ExerciseEntryProps {
   entry: ExerciseEntryData;
   onChange: (entry: ExerciseEntryData) => void;
   onRemove: () => void;
-  onSetComplete: (restSeconds: number) => void;
+  onSetComplete: (ctx: { restSeconds: number; exerciseName: string; setLabel: string }) => void;
 }
 
 const REST_OPTIONS: Array<{ value: number; label: string }> = [
@@ -56,7 +56,17 @@ export function ExerciseEntry({ entry, onChange, onRemove, onSetComplete }: Exer
 
     // If set just marked completed, trigger rest timer
     if (changes.completed === true && !entry.sets[index].completed) {
-      onSetComplete(entry.restSeconds);
+      const completed = newSets[index];
+      const setLabel = completed.isWarmup
+        ? 'warmup'
+        : completed.isDropset
+        ? 'drop'
+        : String(newSets.slice(0, index + 1).filter((s) => !s.isWarmup && !s.isDropset).length);
+      onSetComplete({
+        restSeconds: entry.restSeconds,
+        exerciseName: entry.exerciseName,
+        setLabel,
+      });
     }
   };
 

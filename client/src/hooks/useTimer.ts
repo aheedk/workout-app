@@ -1,8 +1,10 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 function playBeep() {
   try {
-    const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const AudioCtx =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     const ctx = new AudioCtx();
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
@@ -19,45 +21,119 @@ function playBeep() {
   }
 }
 
+/**
+ * Countdown timer with wall-clock semantics — the remaining time is derived
+ * from `Date.now()` and an `endsAt` deadline, so background tabs and
+ * suspended PWAs catch up correctly when they come back to the foreground
+ * instead of pausing where setInterval left off.
+ */
 export function useTimer(initialSeconds: number) {
-  const [seconds, setSeconds] = useState(initialSeconds);
-  const [isRunning, setIsRunning] = useState(false);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [baseSeconds, setBaseSeconds] = useState(initialSeconds);
+  const [endsAt, setEndsAt] = useState<number | null>(null);
+  const [pausedRemaining, setPausedRemaining] = useState<number | null>(null);
+  const [, forceTick] = useState(0);
+  const completedRef = useRef(false);
+  const onCompleteRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
-    setSeconds(initialSeconds);
+    setBaseSeconds(initialSeconds);
+    setEndsAt(null);
+    setPausedRemaining(null);
+    completedRef.current = false;
   }, [initialSeconds]);
 
+  const computeRemaining = useCallback((): number => {
+    if (endsAt != null) {
+      return Math.max(0, Math.ceil((endsAt - Date.now()) / 1000));
+    }
+    if (pausedRemaining != null) return pausedRemaining;
+    return baseSeconds;
+  }, [endsAt, pausedRemaining, baseSeconds]);
+
+  const isRunning = endsAt != null;
+  const seconds = computeRemaining();
+
+  // Re-render once per second while running so the UI updates. The math
+  // itself doesn't depend on the interval firing — it's derived from
+  // Date.now() — so a throttled tab just catches up on the next render.
   useEffect(() => {
     if (!isRunning) return;
-    intervalRef.current = setInterval(() => {
-      setSeconds((s) => {
-        if (s <= 1) {
-          setIsRunning(false);
-          playBeep();
-          return 0;
-        }
-        return s - 1;
-      });
-    }, 1000);
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
+    const id = setInterval(() => forceTick((t) => t + 1), 1000);
+    return () => clearInterval(id);
   }, [isRunning]);
 
-  const start = useCallback(() => setIsRunning(true), []);
-  const pause = useCallback(() => setIsRunning(false), []);
+  // Fire onComplete (beep + caller hook) the first time we cross zero.
+  useEffect(() => {
+    if (!isRunning) return;
+    if (seconds > 0) {
+      completedRef.current = false;
+      return;
+    }
+    if (completedRef.current) return;
+    completedRef.current = true;
+    playBeep();
+    onCompleteRef.current?.();
+    setEndsAt(null);
+    setPausedRemaining(0);
+  }, [isRunning, seconds]);
+
+  // When the page comes back to the foreground, force a recompute so the
+  // displayed seconds matches reality (the setInterval may have been
+  // throttled or paused entirely while hidden).
+  useEffect(() => {
+    const refresh = () => forceTick((t) => t + 1);
+    document.addEventListener('visibilitychange', refresh);
+    window.addEventListener('focus', refresh);
+    return () => {
+      document.removeEventListener('visibilitychange', refresh);
+      window.removeEventListener('focus', refresh);
+    };
+  }, []);
+
+  const start = useCallback(() => {
+    setEndsAt((prev) => {
+      if (prev != null) return prev;
+      const remaining = pausedRemaining ?? baseSeconds;
+      if (remaining <= 0) return prev;
+      completedRef.current = false;
+      return Date.now() + remaining * 1000;
+    });
+    setPausedRemaining(null);
+  }, [baseSeconds, pausedRemaining]);
+
+  const pause = useCallback(() => {
+    setEndsAt((prev) => {
+      if (prev == null) return prev;
+      const remaining = Math.max(0, Math.ceil((prev - Date.now()) / 1000));
+      setPausedRemaining(remaining);
+      return null;
+    });
+  }, []);
+
   const reset = useCallback(
     (newSeconds?: number) => {
-      setIsRunning(false);
-      setSeconds(newSeconds ?? initialSeconds);
+      const next = newSeconds ?? initialSeconds;
+      setBaseSeconds(next);
+      setEndsAt(null);
+      setPausedRemaining(null);
+      completedRef.current = false;
     },
     [initialSeconds]
   );
 
-  return { seconds, isRunning, start, pause, reset };
+  const setOnComplete = useCallback((cb: (() => void) | null) => {
+    onCompleteRef.current = cb;
+  }, []);
+
+  const endsAtMs = endsAt;
+
+  return { seconds, isRunning, start, pause, reset, setOnComplete, endsAt: endsAtMs };
 }
 
+/**
+ * Wall-clock elapsed timer — accepts an optional `startedAt` so a resumed
+ * workout counts from the original start instead of restarting at zero.
+ */
 export function useElapsedTimer(startedAt?: number) {
   const startRef = useRef<number>(startedAt ?? Date.now());
   const [elapsed, setElapsed] = useState(() =>
@@ -70,10 +146,17 @@ export function useElapsedTimer(startedAt?: number) {
   }, [startedAt]);
 
   useEffect(() => {
-    const i = setInterval(() => {
+    const tick = () =>
       setElapsed(Math.max(0, Math.floor((Date.now() - startRef.current) / 1000)));
-    }, 1000);
-    return () => clearInterval(i);
+    const i = setInterval(tick, 1000);
+    const refresh = () => tick();
+    document.addEventListener('visibilitychange', refresh);
+    window.addEventListener('focus', refresh);
+    return () => {
+      clearInterval(i);
+      document.removeEventListener('visibilitychange', refresh);
+      window.removeEventListener('focus', refresh);
+    };
   }, []);
 
   return elapsed;
