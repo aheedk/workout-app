@@ -1,6 +1,9 @@
 {
   "name": "workout-app",
   "private": true,
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "workspaces": ["shared", "server", "client"],
   "scripts": {
     "dev": "concurrently \"npm run dev -w server\" \"npm run dev -w client\"",
