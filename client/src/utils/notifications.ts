@@ -37,6 +37,12 @@ interface RestNotificationOpts {
   url?: string;
   /** Show on lock screen until dismissed. Honored on desktop; iOS may ignore. */
   requireInteraction?: boolean;
+  /** Post without sound or vibration. iOS 16.4+ honors this. Use for the
+   *  in-progress rest banner so it shows on the lock screen without alerting. */
+  silent?: boolean;
+  /** When this post replaces a same-tag notification, alert the user again.
+   *  iOS otherwise replaces silently. Set true only on the completion banner. */
+  renotify?: boolean;
   /** Optional epoch ms — used as the notification `timestamp` so the lock
    *  screen shows accurate elapsed time on supported platforms. */
   timestamp?: number;
@@ -64,9 +70,8 @@ export async function showRestNotification(opts: RestNotificationOpts): Promise<
     badge: '/pwa-64x64.png',
     requireInteraction: opts.requireInteraction ?? false,
     data,
-    // `silent` and `renotify` aren't supported on iOS; harmless elsewhere.
-    silent: false,
-    renotify: true,
+    silent: opts.silent ?? false,
+    renotify: opts.renotify ?? false,
   } as NotificationOptions;
   if (opts.timestamp != null) {
     (baseOptions as NotificationOptions & { timestamp: number }).timestamp = opts.timestamp;

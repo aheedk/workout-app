@@ -17,7 +17,7 @@ interface RestTimerProps {
 const PRESETS = [30, 60, 90, 120, 180];
 
 export function RestTimer({ seconds, exerciseName, setLabel, onClose }: RestTimerProps) {
-  const { seconds: remaining, isRunning, start, pause, reset, setOnComplete } = useTimer(seconds);
+  const { seconds: remaining, isRunning, start, pause, reset, setOnComplete, endsAt } = useTimer(seconds);
 
   useEffect(() => {
     start();
@@ -30,26 +30,37 @@ export function RestTimer({ seconds, exerciseName, setLabel, onClose }: RestTime
     void ensureNotificationPermission();
   }, []);
 
-  // Surface the rest as a system notification while the timer is running so
-  // the user can leave the app (lock the phone, switch tabs) and still see
-  // / tap back when rest is up. Re-show every ~10s while running because
-  // notifications can't be edited — only replaced via the same tag.
-  const lastShownAtRef = useRef<number>(0);
+  // Post a single rest notification per run: one silent banner when rest
+  // begins (body shows the absolute end-clock time so the lock screen has a
+  // useful reference), and one alerting banner when rest completes — same
+  // `tag` replaces the first in place. iOS PWAs can't render a live-ticking
+  // countdown inside a notification (Live Activities are native-only), so
+  // showing "ends at HH:MM" is the closest stand-in.
+  const startNotifShownRef = useRef(false);
   useEffect(() => {
-    if (!isRunning) return;
+    if (!isRunning) {
+      startNotifShownRef.current = false;
+      return;
+    }
+    if (startNotifShownRef.current) return;
+    if (endsAt == null) return;
+    startNotifShownRef.current = true;
+
+    const endsAtStr = new Date(endsAt).toLocaleTimeString([], {
+      hour: 'numeric',
+      minute: '2-digit',
+    });
     const title = exerciseName
       ? `${exerciseName}${setLabel ? ` · set ${setLabel}` : ''}`
       : 'Workout';
-    const body = remaining > 0 ? `Rest ${formatDurationTimer(remaining)} — tap to return` : 'Rest done';
-    const now = Date.now();
-    if (now - lastShownAtRef.current >= 10_000 || remaining <= 5) {
-      lastShownAtRef.current = now;
-      void showRestNotification({ title, body, url: '/workouts/active' });
-    }
-  }, [isRunning, remaining, exerciseName, setLabel]);
+    void showRestNotification({
+      title,
+      body: `Rest ${formatDurationTimer(remaining)} — ends at ${endsAtStr}`,
+      url: '/workouts/active',
+      silent: true,
+    });
+  }, [isRunning, endsAt, remaining, exerciseName, setLabel]);
 
-  // When the timer hits zero, replace the running notification with a "done"
-  // banner that sticks until dismissed. setOnComplete fires exactly once.
   useEffect(() => {
     setOnComplete(() => {
       const title = exerciseName ? `Rest done — ${exerciseName}` : 'Rest done';
@@ -58,6 +69,7 @@ export function RestTimer({ seconds, exerciseName, setLabel, onClose }: RestTime
         body: 'Tap to return to your workout',
         url: '/workouts/active',
         requireInteraction: true,
+        renotify: true,
       });
     });
     return () => setOnComplete(null);
