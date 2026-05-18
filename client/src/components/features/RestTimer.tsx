@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useTimer } from '../../hooks/useTimer';
 import { formatDurationTimer } from '../../utils/formatting';
 import {
@@ -17,7 +17,7 @@ interface RestTimerProps {
 const PRESETS = [30, 60, 90, 120, 180];
 
 export function RestTimer({ seconds, exerciseName, setLabel, onClose }: RestTimerProps) {
-  const { seconds: remaining, isRunning, start, pause, reset, setOnComplete, endsAt } = useTimer(seconds);
+  const { seconds: remaining, isRunning, start, pause, reset, setOnComplete } = useTimer(seconds);
 
   useEffect(() => {
     start();
@@ -30,37 +30,9 @@ export function RestTimer({ seconds, exerciseName, setLabel, onClose }: RestTime
     void ensureNotificationPermission();
   }, []);
 
-  // Post a single rest notification per run: one silent banner when rest
-  // begins (body shows the absolute end-clock time so the lock screen has a
-  // useful reference), and one alerting banner when rest completes — same
-  // `tag` replaces the first in place. iOS PWAs can't render a live-ticking
-  // countdown inside a notification (Live Activities are native-only), so
-  // showing "ends at HH:MM" is the closest stand-in.
-  const startNotifShownRef = useRef(false);
-  useEffect(() => {
-    if (!isRunning) {
-      startNotifShownRef.current = false;
-      return;
-    }
-    if (startNotifShownRef.current) return;
-    if (endsAt == null) return;
-    startNotifShownRef.current = true;
-
-    const endsAtStr = new Date(endsAt).toLocaleTimeString([], {
-      hour: 'numeric',
-      minute: '2-digit',
-    });
-    const title = exerciseName
-      ? `${exerciseName}${setLabel ? ` · set ${setLabel}` : ''}`
-      : 'Workout';
-    void showRestNotification({
-      title,
-      body: `Rest ${formatDurationTimer(remaining)} — ends at ${endsAtStr}`,
-      url: '/workouts/active',
-      silent: true,
-    });
-  }, [isRunning, endsAt, remaining, exerciseName, setLabel]);
-
+  // Only post one notification — when the rest timer hits zero. iOS keeps
+  // every delivered notification in NC, so re-posting during the rest
+  // (even with the same tag) stacks rows; we skip it entirely.
   useEffect(() => {
     setOnComplete(() => {
       const title = exerciseName ? `Rest done — ${exerciseName}` : 'Rest done';
@@ -69,7 +41,6 @@ export function RestTimer({ seconds, exerciseName, setLabel, onClose }: RestTime
         body: 'Tap to return to your workout',
         url: '/workouts/active',
         requireInteraction: true,
-        renotify: true,
       });
     });
     return () => setOnComplete(null);
