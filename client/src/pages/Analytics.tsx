@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '../components/ui/PageHeader';
 import { StatCard } from '../components/ui/StatCard';
@@ -49,6 +49,15 @@ export function Analytics() {
     .slice()
     .sort((a, b) => new Date(b.achievedAt).getTime() - new Date(a.achievedAt).getTime())
     .slice(0, 5);
+
+  // Default the progress chart to the most recently PR'd exercise instead of
+  // an empty "pick an exercise" state.
+  useEffect(() => {
+    if (!selectedExerciseId && topRecords.length > 0) {
+      setSelectedExerciseId(topRecords[0].exerciseId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [records]);
 
   if (loadingSummary) {
     return (

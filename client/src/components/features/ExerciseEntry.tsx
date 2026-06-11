@@ -52,6 +52,12 @@ export function ExerciseEntry({ entry, onChange, onRemove, onSetComplete, onMove
         }, null)
     : null;
 
+  // Last session's working sets in order, so set 2 today hints at set 2 last
+  // time rather than every row showing the same "best" numbers.
+  const lastWorkSets = (lastSession?.sets ?? []).filter(
+    (s) => !s.isWarmup && !s.isDropset && (s.weight != null || s.reps != null)
+  );
+
   const handleSetChange = (index: number, changes: Partial<SetData>) => {
     const newSets = entry.sets.map((s, i) => (i === index ? { ...s, ...changes } : s));
     onChange({ ...entry, sets: newSets });
@@ -177,20 +183,27 @@ export function ExerciseEntry({ entry, onChange, onRemove, onSetComplete, onMove
             <span></span>
           </div>
           <div className="space-y-1">
-            {entry.sets.map((set, i) => (
-              <SetRow
-                key={i}
-                setNumber={
-                  entry.sets
-                    .slice(0, i + 1)
-                    .filter((s) => !s.isWarmup && !s.isDropset).length
-                }
-                set={set}
-                previous={previousBest ?? undefined}
-                onChange={(changes) => handleSetChange(i, changes)}
-                onRemove={() => handleRemoveSet(i)}
-              />
-            ))}
+            {entry.sets.map((set, i) => {
+              const setNumber = entry.sets
+                .slice(0, i + 1)
+                .filter((s) => !s.isWarmup && !s.isDropset).length;
+              const matching =
+                !set.isWarmup && !set.isDropset ? lastWorkSets[setNumber - 1] : undefined;
+              return (
+                <SetRow
+                  key={i}
+                  setNumber={setNumber}
+                  set={set}
+                  previous={
+                    matching
+                      ? { weight: matching.weight, reps: matching.reps }
+                      : previousBest ?? undefined
+                  }
+                  onChange={(changes) => handleSetChange(i, changes)}
+                  onRemove={() => handleRemoveSet(i)}
+                />
+              );
+            })}
           </div>
           <div className="mt-2 grid grid-cols-2 gap-2">
             <button
