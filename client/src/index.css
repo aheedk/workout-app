@@ -2,6 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Paint the page root in the theme color so overscroll rubber-banding and
+   zooming out past the content never reveal a white backdrop. color-scheme
+   keeps native scrollbars/form controls matching the theme. */
+@layer base {
+  html {
+    @apply bg-gray-50;
+    color-scheme: light;
+  }
+  html.dark {
+    @apply bg-gray-900;
+    color-scheme: dark;
+  }
+}
+
 @layer utilities {
   .pt-safe {
     padding-top: env(safe-area-inset-top);
