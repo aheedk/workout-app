@@ -17,6 +17,8 @@ interface ExerciseEntryProps {
   onChange: (entry: ExerciseEntryData) => void;
   onRemove: () => void;
   onSetComplete: (ctx: { restSeconds: number; exerciseName: string; setLabel: string }) => void;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
 }
 
 const REST_OPTIONS: Array<{ value: number; label: string }> = [
@@ -31,7 +33,7 @@ const REST_OPTIONS: Array<{ value: number; label: string }> = [
   { value: 300, label: '5m' },
 ];
 
-export function ExerciseEntry({ entry, onChange, onRemove, onSetComplete }: ExerciseEntryProps) {
+export function ExerciseEntry({ entry, onChange, onRemove, onSetComplete, onMoveUp, onMoveDown }: ExerciseEntryProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const { user } = useAuth();
@@ -49,6 +51,12 @@ export function ExerciseEntry({ entry, onChange, onRemove, onSetComplete }: Exer
           return best;
         }, null)
     : null;
+
+  // Last session's working sets in order, so set 2 today hints at set 2 last
+  // time rather than every row showing the same "best" numbers.
+  const lastWorkSets = (lastSession?.sets ?? []).filter(
+    (s) => !s.isWarmup && !s.isDropset && (s.weight != null || s.reps != null)
+  );
 
   const handleSetChange = (index: number, changes: Partial<SetData>) => {
     const newSets = entry.sets.map((s, i) => (i === index ? { ...s, ...changes } : s));
@@ -127,6 +135,28 @@ export function ExerciseEntry({ entry, onChange, onRemove, onSetComplete }: Exer
           )}
         </button>
         <div className="flex items-center gap-1 shrink-0">
+          {(onMoveUp || onMoveDown) && (
+            <div className="flex flex-col -my-1">
+              <button
+                onClick={onMoveUp}
+                disabled={!onMoveUp}
+                className="px-1.5 text-xs leading-4 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 disabled:opacity-30 disabled:hover:text-gray-400"
+                title="Move up"
+                aria-label="Move exercise up"
+              >
+                ▲
+              </button>
+              <button
+                onClick={onMoveDown}
+                disabled={!onMoveDown}
+                className="px-1.5 text-xs leading-4 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 disabled:opacity-30 disabled:hover:text-gray-400"
+                title="Move down"
+                aria-label="Move exercise down"
+              >
+                ▼
+              </button>
+            </div>
+          )}
           <button
             onClick={() => setHistoryOpen(true)}
             className="text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-2 py-1 rounded"
@@ -153,20 +183,27 @@ export function ExerciseEntry({ entry, onChange, onRemove, onSetComplete }: Exer
             <span></span>
           </div>
           <div className="space-y-1">
-            {entry.sets.map((set, i) => (
-              <SetRow
-                key={i}
-                setNumber={
-                  entry.sets
-                    .slice(0, i + 1)
-                    .filter((s) => !s.isWarmup && !s.isDropset).length
-                }
-                set={set}
-                previous={previousBest ?? undefined}
-                onChange={(changes) => handleSetChange(i, changes)}
-                onRemove={() => handleRemoveSet(i)}
-              />
-            ))}
+            {entry.sets.map((set, i) => {
+              const setNumber = entry.sets
+                .slice(0, i + 1)
+                .filter((s) => !s.isWarmup && !s.isDropset).length;
+              const matching =
+                !set.isWarmup && !set.isDropset ? lastWorkSets[setNumber - 1] : undefined;
+              return (
+                <SetRow
+                  key={i}
+                  setNumber={setNumber}
+                  set={set}
+                  previous={
+                    matching
+                      ? { weight: matching.weight, reps: matching.reps }
+                      : previousBest ?? undefined
+                  }
+                  onChange={(changes) => handleSetChange(i, changes)}
+                  onRemove={() => handleRemoveSet(i)}
+                />
+              );
+            })}
           </div>
           <div className="mt-2 grid grid-cols-2 gap-2">
             <button

@@ -24,7 +24,9 @@ export function WorkoutCard({ workout }: { workout: WorkoutSummary }) {
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-600 dark:text-gray-400">
-        <span>{workout.exerciseCount} exercises</span>
+        <span>
+          {workout.exerciseCount} exercise{workout.exerciseCount === 1 ? '' : 's'}
+        </span>
         {workout.durationMinutes != null && <span>{formatDuration(workout.durationMinutes)}</span>}
         <span>
           {workout.totalVolume.toLocaleString()} {unit} volume

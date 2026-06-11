@@ -2,8 +2,25 @@ export function formatWeight(weight: number, unit: 'kg' | 'lb'): string {
   return `${weight} ${unit}`;
 }
 
+/**
+ * `new Date('YYYY-MM-DD')` parses as UTC midnight, which renders as the
+ * previous day in timezones west of UTC. Parse date-only strings as local
+ * dates so the displayed day always matches the calendar day.
+ */
+export function parseDateString(dateStr: string): Date {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr);
+  if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  return new Date(dateStr);
+}
+
+/** Local calendar date as YYYY-MM-DD (what the server expects for workout dates). */
+export function toLocalDateString(date: Date): string {
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
 export function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('en-US', {
+  return parseDateString(dateStr).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -26,13 +43,12 @@ export function formatDurationTimer(totalSeconds: number): string {
 }
 
 export function formatRelativeDate(dateStr: string): string {
-  const date = new Date(dateStr);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const date = parseDateString(dateStr);
+  const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const diffDays = Math.round((startOfDay(new Date()) - startOfDay(date)) / (1000 * 60 * 60 * 24));
 
   if (diffDays === 0) return 'Today';
   if (diffDays === 1) return 'Yesterday';
-  if (diffDays < 7) return `${diffDays} days ago`;
+  if (diffDays > 1 && diffDays < 7) return `${diffDays} days ago`;
   return formatDate(dateStr);
 }

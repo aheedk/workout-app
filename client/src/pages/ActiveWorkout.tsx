@@ -7,47 +7,68 @@ import { RestTimer } from '../components/features/RestTimer';
 import { useCreateWorkout } from '../api/workouts';
 import { useToast } from '../components/ui/Toast';
 import { useElapsedTimer } from '../hooks/useTimer';
-import { formatDurationTimer } from '../utils/formatting';
+import { formatDurationTimer, toLocalDateString } from '../utils/formatting';
 import {
   clearActiveWorkout,
   loadActiveWorkout,
   saveActiveWorkout,
+  type ActiveWorkoutSnapshot,
 } from '../utils/activeWorkoutStorage';
 import type { Exercise, Routine, CreateWorkoutRequest } from '@workout-app/shared';
+
+/** Prefilled session passed via navigation state (e.g. "Repeat" on a past workout). */
+export interface WorkoutPrefill {
+  name: string;
+  exercises: ExerciseEntryData[];
+}
+
+// Time away after which a resumed session is treated as paused rather than
+// running: the gap is excluded from the workout duration.
+const IDLE_GAP_MS = 15 * 60 * 1000;
+
+const AUTO_NAME_PATTERN = /^Workout [A-Z][a-z]{2} \d{1,2}$/;
+
+function autoName(): string {
+  return `Workout ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+}
+
+/**
+ * Resume a persisted session. Idle time since the last save is excluded by
+ * shifting `startedAt` forward, so the on-screen timer (and the saved
+ * duration) only counts time actually spent in the workout. If the session
+ * was auto-named on an earlier day and never renamed, refresh the name.
+ */
+function resumeSnapshot(p: ActiveWorkoutSnapshot) {
+  const gap = Date.now() - p.savedAt;
+  let startedAt = p.startedAt;
+  let name = p.name;
+  if (gap > IDLE_GAP_MS) {
+    startedAt = Math.min(Date.now(), p.startedAt + gap);
+    if (AUTO_NAME_PATTERN.test(name)) name = autoName();
+  }
+  return { name, notes: p.notes, exercises: p.exercises, startedAt };
+}
 
 export function ActiveWorkout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const routineState = (location.state as { routine?: Routine } | null)?.routine;
+  const navState = location.state as { routine?: Routine; prefill?: WorkoutPrefill } | null;
+  const routineState = navState?.routine;
+  const prefillState = navState?.prefill;
 
   // Decide once on first render whether we're resuming a paused session or
   // starting fresh. After that, state lives in React + localStorage.
   const initialRef = useRef<{
     name: string;
+    notes: string;
     exercises: ExerciseEntryData[];
     startedAt: number;
   } | null>(null);
 
   if (initialRef.current === null) {
     const persisted = loadActiveWorkout();
-    if (routineState) {
-      // The user explicitly chose a routine — discard any paused session.
-      if (persisted) {
-        const ok = window.confirm(
-          'You have a paused workout in progress. Discard it and start this routine?'
-        );
-        if (!ok) {
-          // Resume the paused session instead.
-          initialRef.current = {
-            name: persisted.name,
-            exercises: persisted.exercises,
-            startedAt: persisted.startedAt,
-          };
-        }
-      }
-      if (initialRef.current === null) {
-        clearActiveWorkout();
-        initialRef.current = {
+    const incoming: { name: string; exercises: ExerciseEntryData[] } | null = routineState
+      ? {
           name: routineState.name,
           exercises: routineState.exercises.map((re) => ({
             exerciseId: re.exerciseId,
@@ -63,18 +84,34 @@ export function ActiveWorkout() {
               completed: false,
             })),
           })),
+        }
+      : prefillState ?? null;
+
+    if (incoming) {
+      // The user explicitly chose a routine or repeat — discard any paused session.
+      if (persisted) {
+        const ok = window.confirm(
+          'You have a paused workout in progress. Discard it and start this one?'
+        );
+        if (!ok) {
+          initialRef.current = resumeSnapshot(persisted);
+        }
+      }
+      if (initialRef.current === null) {
+        clearActiveWorkout();
+        initialRef.current = {
+          name: incoming.name,
+          notes: '',
+          exercises: incoming.exercises,
           startedAt: Date.now(),
         };
       }
     } else if (persisted) {
-      initialRef.current = {
-        name: persisted.name,
-        exercises: persisted.exercises,
-        startedAt: persisted.startedAt,
-      };
+      initialRef.current = resumeSnapshot(persisted);
     } else {
       initialRef.current = {
-        name: `Workout ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`,
+        name: autoName(),
+        notes: '',
         exercises: [],
         startedAt: Date.now(),
       };
@@ -87,6 +124,7 @@ export function ActiveWorkout() {
   const { showToast } = useToast();
 
   const [name, setName] = useState(initial.name);
+  const [notes, setNotes] = useState(initial.notes);
   const [exercises, setExercises] = useState<ExerciseEntryData[]>(initial.exercises);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [restTimer, setRestTimer] = useState<{
@@ -100,8 +138,8 @@ export function ActiveWorkout() {
   // and immediately backing out shouldn't leave a stale "Resume" banner.
   useEffect(() => {
     if (exercises.length === 0) return;
-    saveActiveWorkout({ name, exercises, startedAt: initial.startedAt });
-  }, [name, exercises, initial.startedAt]);
+    saveActiveWorkout({ name, notes, exercises, startedAt: initial.startedAt });
+  }, [name, notes, exercises, initial.startedAt]);
 
   const handleAddExercise = (exercise: Exercise) => {
     setExercises((prev) => [
@@ -122,6 +160,16 @@ export function ActiveWorkout() {
 
   const handleRemoveExercise = (index: number) => {
     setExercises((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleMoveExercise = (index: number, direction: -1 | 1) => {
+    setExercises((prev) => {
+      const target = index + direction;
+      if (target < 0 || target >= prev.length) return prev;
+      const next = [...prev];
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
   };
 
   const handleSetComplete = (ctx: {
@@ -148,10 +196,17 @@ export function ActiveWorkout() {
       return;
     }
 
+    // Active minutes, excluding idle gaps (handled at resume). A session that
+    // still computes to more than 12 hours isn't a meaningful duration — save
+    // the workout without one rather than recording a multi-day "workout".
+    const minutes = Math.round(elapsed / 60);
+    const durationMinutes = minutes >= 1 && minutes <= 720 ? minutes : undefined;
+
     const data: CreateWorkoutRequest = {
       name: name.trim(),
-      date: new Date().toISOString(),
-      durationMinutes: Math.round(elapsed / 60),
+      date: toLocalDateString(new Date()),
+      durationMinutes,
+      notes: notes.trim() || undefined,
       exercises: exercises.map((e) => ({
         exerciseId: e.exerciseId,
         notes: e.notes || undefined,
@@ -238,6 +293,8 @@ export function ActiveWorkout() {
             onChange={(updated) => handleUpdateExercise(i, updated)}
             onRemove={() => handleRemoveExercise(i)}
             onSetComplete={handleSetComplete}
+            onMoveUp={i > 0 ? () => handleMoveExercise(i, -1) : undefined}
+            onMoveDown={i < exercises.length - 1 ? () => handleMoveExercise(i, 1) : undefined}
           />
         ))}
 
@@ -247,6 +304,14 @@ export function ActiveWorkout() {
         >
           + Add Exercise
         </button>
+
+        <textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder="Workout notes — how did it go?"
+          rows={2}
+          className="w-full px-4 py-3 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+        />
 
         <div className="flex gap-2 pt-2">
           <button

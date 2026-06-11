@@ -4,7 +4,7 @@ import { PageHeader } from '../components/ui/PageHeader';
 import { Calendar } from '../components/features/Calendar';
 import { useWorkouts } from '../api/workouts';
 import { useAuth } from '../hooks/useAuth';
-import { formatDuration } from '../utils/formatting';
+import { formatDuration, parseDateString } from '../utils/formatting';
 
 export function CalendarPage() {
   const [selected, setSelected] = useState<{ date: string; ids: string[] } | null>(null);
@@ -25,7 +25,7 @@ export function CalendarPage() {
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
           <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
             {selected
-              ? new Date(selected.date).toLocaleDateString('en-US', {
+              ? parseDateString(selected.date).toLocaleDateString('en-US', {
                   weekday: 'long',
                   month: 'long',
                   day: 'numeric',

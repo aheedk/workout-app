@@ -1,6 +1,6 @@
 import { prisma } from '../utils/prisma';
 import { AppError } from '../middleware/errorHandler';
-import { calculateEstimated1RM, calculateVolume } from '../utils/calculations';
+import { calculateEstimated1RM, calculateVolume, sanitizeDurationMinutes } from '../utils/calculations';
 import type { CreateWorkoutRequest } from '@workout-app/shared';
 
 function formatWorkout(w: any) {
@@ -11,7 +11,7 @@ function formatWorkout(w: any) {
     date: w.date.toISOString().split('T')[0],
     startedAt: w.startedAt.toISOString(),
     completedAt: w.completedAt?.toISOString() || null,
-    durationMinutes: w.durationMinutes,
+    durationMinutes: sanitizeDurationMinutes(w.durationMinutes),
     notes: w.notes,
     tags: w.tags,
     exercises: (w.exercises || []).map((we: any) => ({
@@ -94,7 +94,7 @@ export async function listWorkouts(
         id: w.id,
         name: w.name,
         date: w.date.toISOString().split('T')[0],
-        durationMinutes: w.durationMinutes,
+        durationMinutes: sanitizeDurationMinutes(w.durationMinutes),
         tags: w.tags,
         exerciseCount: w.exercises.length,
         totalVolume,
