@@ -7,7 +7,7 @@ import { PRBadge } from './PRBadge';
 import { useExerciseHistory, useExerciseRecords, useBackfillRecords } from '../../api/exercises';
 import { useAuth } from '../../hooks/useAuth';
 import { useToast } from '../ui/Toast';
-import { formatDate } from '../../utils/formatting';
+import { formatDate, parseDateString } from '../../utils/formatting';
 import type { ExerciseHistory, PersonalRecord } from '@workout-app/shared';
 
 interface ExerciseHistoryModalProps {
@@ -289,7 +289,7 @@ function ProgressGraph({ history, unit }: { history: ExerciseHistory[]; unit: 'k
               <XAxis
                 dataKey="date"
                 tickFormatter={(v) =>
-                  new Date(v).toLocaleDateString('en', { month: 'short', day: 'numeric' })
+                  parseDateString(String(v)).toLocaleDateString('en', { month: 'short', day: 'numeric' })
                 }
                 tick={{ fontSize: 10, fill: '#9ca3af' }}
                 axisLine={false}
@@ -310,7 +310,7 @@ function ProgressGraph({ history, unit }: { history: ExerciseHistory[]; unit: 'k
                   fontSize: 12,
                 }}
                 formatter={(v: number) => [`${v.toLocaleString()} ${suffix}`, METRIC_OPTIONS.find((o) => o.value === metric)?.label]}
-                labelFormatter={(l) => new Date(l).toLocaleDateString()}
+                labelFormatter={(l) => parseDateString(String(l)).toLocaleDateString()}
               />
               <Line
                 type="monotone"

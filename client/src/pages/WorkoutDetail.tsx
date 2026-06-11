@@ -8,8 +8,9 @@ import { ExerciseHistoryModal } from '../components/features/ExerciseHistoryModa
 import { useWorkout, useDeleteWorkout } from '../api/workouts';
 import { useAuth } from '../hooks/useAuth';
 import { formatDate, formatDuration } from '../utils/formatting';
-import { calculateVolume } from '../utils/calculations';
+import { calculateEstimated1RM, calculateVolume } from '../utils/calculations';
 import { useToast } from '../components/ui/Toast';
+import type { WorkoutPrefill } from './ActiveWorkout';
 
 export function WorkoutDetail() {
   const { id } = useParams<{ id: string }>();
@@ -21,6 +22,28 @@ export function WorkoutDetail() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [historyFor, setHistoryFor] = useState<{ id: string; name: string } | null>(null);
   const unit = user?.unitPreference ?? 'kg';
+
+  const handleRepeat = () => {
+    if (!workout) return;
+    const prefill: WorkoutPrefill = {
+      name: workout.name,
+      exercises: workout.exercises.map((e) => ({
+        exerciseId: e.exerciseId,
+        exerciseName: e.exerciseName,
+        notes: '',
+        restSeconds: 90,
+        sets: e.sets.map((s) => ({
+          weight: s.weight,
+          reps: s.reps,
+          rpe: null,
+          isWarmup: s.isWarmup,
+          isDropset: s.isDropset,
+          completed: false,
+        })),
+      })),
+    };
+    navigate('/workouts/active', { state: { prefill } });
+  };
 
   const handleDelete = async () => {
     if (!id) return;
@@ -56,6 +79,12 @@ export function WorkoutDetail() {
         title={workout.name}
         action={
           <div className="flex gap-2">
+            <button
+              onClick={handleRepeat}
+              className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium"
+            >
+              Repeat
+            </button>
             <button
               onClick={() => setShowConfirm(true)}
               className="px-3 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg text-sm font-medium"
@@ -107,15 +136,42 @@ export function WorkoutDetail() {
       </div>
 
       <div className="space-y-4">
-        {workout.exercises.map((exercise) => (
+        {workout.exercises.map((exercise) => {
+          const exerciseVolume = exercise.sets.reduce(
+            (s, set) => s + (set.isWarmup ? 0 : calculateVolume(set.weight ?? 0, set.reps ?? 0)),
+            0
+          );
+          const best1rm = exercise.sets.reduce(
+            (best, set) =>
+              set.isWarmup || set.isDropset
+                ? best
+                : Math.max(best, calculateEstimated1RM(set.weight ?? 0, set.reps ?? 0)),
+            0
+          );
+          return (
           <div
             key={exercise.id}
             className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5"
           >
             <div className="flex items-center justify-between gap-3 mb-3">
-              <h3 className="font-semibold text-gray-900 dark:text-white min-w-0 truncate">
-                {exercise.exerciseName}
-              </h3>
+              <div className="min-w-0">
+                <h3 className="font-semibold text-gray-900 dark:text-white truncate">
+                  {exercise.exerciseName}
+                </h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  {exerciseVolume > 0 && (
+                    <span>
+                      {exerciseVolume.toLocaleString()} {unit} volume
+                    </span>
+                  )}
+                  {exerciseVolume > 0 && best1rm > 0 && <span> · </span>}
+                  {best1rm > 0 && (
+                    <span>
+                      est. 1RM {best1rm.toLocaleString()} {unit}
+                    </span>
+                  )}
+                </p>
+              </div>
               <button
                 onClick={() => setHistoryFor({ id: exercise.exerciseId, name: exercise.exerciseName })}
                 className="text-sm text-blue-600 dark:text-blue-400 hover:underline shrink-0"
@@ -171,7 +227,8 @@ export function WorkoutDetail() {
               </tbody>
             </table>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       <ConfirmDialog

@@ -4,6 +4,7 @@ const STORAGE_KEY = 'activeWorkout:v1';
 
 export interface ActiveWorkoutSnapshot {
   name: string;
+  notes: string;
   exercises: ExerciseEntryData[];
   startedAt: number;
   savedAt: number;
@@ -23,6 +24,7 @@ export function loadActiveWorkout(): ActiveWorkoutSnapshot | null {
     }
     return {
       name: parsed.name,
+      notes: typeof parsed.notes === 'string' ? parsed.notes : '',
       exercises: parsed.exercises as ExerciseEntryData[],
       startedAt: parsed.startedAt,
       savedAt: typeof parsed.savedAt === 'number' ? parsed.savedAt : Date.now(),

@@ -1,5 +1,5 @@
 import { prisma } from '../utils/prisma';
-import { calculateVolume } from '../utils/calculations';
+import { calculateVolume, sanitizeDurationMinutes } from '../utils/calculations';
 
 export async function getSummary(userId: string) {
   const now = new Date();
@@ -38,8 +38,8 @@ export async function getSummary(userId: string) {
   };
 
   const allDurations = monthWorkouts
-    .filter((w) => w.durationMinutes !== null)
-    .map((w) => w.durationMinutes!);
+    .map((w) => sanitizeDurationMinutes(w.durationMinutes))
+    .filter((d): d is number => d !== null);
   const avgDuration = allDurations.length > 0 ? Math.round(allDurations.reduce((a: number, b: number) => a + b, 0) / allDurations.length) : 0;
 
   return {

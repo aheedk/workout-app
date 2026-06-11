@@ -10,6 +10,7 @@ const setSchema = z.object({
   reps: z.number().int().nullable().optional(),
   rpe: z.number().min(1).max(10).nullable().optional(),
   isWarmup: z.boolean().optional(),
+  isDropset: z.boolean().optional(),
 });
 
 const exerciseSchema = z.object({
@@ -24,7 +25,7 @@ const createWorkoutSchema = z.object({
   routineId: z.string().uuid().optional(),
   notes: z.string().optional(),
   tags: z.array(z.string()).optional(),
-  durationMinutes: z.number().int().optional(),
+  durationMinutes: z.number().int().min(1).max(10080).optional(),
   exercises: z.array(exerciseSchema).min(1),
 });
 

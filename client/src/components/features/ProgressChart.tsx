@@ -2,6 +2,7 @@ import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianG
 import { useExerciseHistory } from '../../api/exercises';
 import { useAuth } from '../../hooks/useAuth';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
+import { parseDateString } from '../../utils/formatting';
 
 interface ProgressChartProps {
   exerciseId: string;
@@ -49,7 +50,7 @@ export function ProgressChart({ exerciseId }: ProgressChartProps) {
           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:opacity-20" />
           <XAxis
             dataKey="date"
-            tickFormatter={(v) => new Date(v).toLocaleDateString('en', { month: 'short', day: 'numeric' })}
+            tickFormatter={(v) => parseDateString(v).toLocaleDateString('en', { month: 'short', day: 'numeric' })}
             tick={{ fontSize: 11, fill: '#9ca3af' }}
             axisLine={false}
             tickLine={false}
@@ -63,7 +64,7 @@ export function ProgressChart({ exerciseId }: ProgressChartProps) {
               color: '#fff',
             }}
             formatter={(v: number) => [`${v} ${unit}`, 'Max weight']}
-            labelFormatter={(l) => new Date(l).toLocaleDateString()}
+            labelFormatter={(l) => parseDateString(String(l)).toLocaleDateString()}
           />
           <Line
             type="monotone"

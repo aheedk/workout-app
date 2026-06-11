@@ -85,6 +85,7 @@ export function Dashboard() {
         <StatCard
           label="Avg Duration"
           value={summary?.avgDurationMinutes ? formatDuration(summary.avgDurationMinutes) : '—'}
+          subtext="this month"
         />
       </div>
 
@@ -246,7 +247,9 @@ function Stat({ label, value }: { label: string; value: string | number }) {
 }
 
 function PausedWorkoutBanner({ paused }: { paused: ActiveWorkoutSnapshot }) {
-  const elapsedSeconds = Math.max(0, Math.floor((Date.now() - paused.startedAt) / 1000));
+  // Time actually spent in the session (frozen at the last save), not
+  // wall-clock time since it started — the workout is paused, not running.
+  const elapsedSeconds = Math.max(0, Math.floor((paused.savedAt - paused.startedAt) / 1000));
   const setCount = paused.exercises.reduce((sum, e) => sum + e.sets.length, 0);
   return (
     <Link

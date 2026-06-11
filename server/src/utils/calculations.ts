@@ -14,3 +14,15 @@ export function calculateVolume(weight: number | null, reps: number | null): num
   if (!weight || !reps) return 0;
   return weight * reps;
 }
+
+/**
+ * Workouts saved by older clients could record multi-day durations when a
+ * session was abandoned and finished later. Anything past 12 hours isn't a
+ * real training duration — report it as unknown rather than skewing stats.
+ */
+export const MAX_PLAUSIBLE_DURATION_MINUTES = 720;
+
+export function sanitizeDurationMinutes(minutes: number | null): number | null {
+  if (minutes == null || minutes <= 0 || minutes > MAX_PLAUSIBLE_DURATION_MINUTES) return null;
+  return minutes;
+}
