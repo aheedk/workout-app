@@ -42,6 +42,17 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // recharts (+ d3) is by far the heaviest dependency and only needed
+          // on chart views — keep it out of the main bundle.
+          charts: ['recharts'],
+        },
+      },
+    },
+  },
   server: {
     port: 5173,
     proxy: {
