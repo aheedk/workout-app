@@ -11,29 +11,55 @@ const navItems = [
 
 export function Sidebar() {
   return (
-    <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
-      <div className="flex items-center h-16 px-6 border-b border-gray-200 dark:border-gray-700">
-        <span className="text-xl font-bold text-blue-600 dark:text-blue-400">Workout Tracker</span>
+    <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 z-20 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
+      <div className="flex items-center gap-3 h-20 px-6 border-b border-gray-200 dark:border-gray-700">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center bg-gray-900 dark:bg-gray-50">
+          <span className="font-display text-2xl leading-none text-blue-500 -mt-0.5">L</span>
+        </span>
+        <span className="font-display text-xl leading-[0.92] tracking-wide text-gray-900 dark:text-white">
+          IRON<br />LEDGER
+        </span>
       </div>
-      <nav className="flex-1 px-3 py-4 space-y-1">
+      <nav className="flex-1 px-3 py-6 space-y-0.5">
         {navItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             end={item.to === '/'}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+              `group relative flex items-center gap-3 px-3 py-2.5 text-xs font-semibold uppercase tracking-label transition-colors ${
                 isActive
-                  ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                  : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700/50'
+                  ? 'text-gray-900 dark:text-white'
+                  : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
               }`
             }
           >
-            <item.icon />
-            {item.label}
+            {({ isActive }) => (
+              <>
+                <span
+                  className={`absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] bg-blue-500 transition-all ${
+                    isActive ? 'opacity-100 scale-y-100' : 'opacity-0 scale-y-0'
+                  }`}
+                  aria-hidden
+                />
+                <span
+                  className={
+                    isActive
+                      ? 'text-blue-500'
+                      : 'text-gray-400 group-hover:text-gray-600 dark:text-gray-500 dark:group-hover:text-gray-300'
+                  }
+                >
+                  <item.icon />
+                </span>
+                {item.label}
+              </>
+            )}
           </NavLink>
         ))}
       </nav>
+      <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+        <p className="eyebrow">Log the work</p>
+      </div>
     </aside>
   );
 }

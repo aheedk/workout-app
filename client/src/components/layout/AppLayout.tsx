@@ -4,10 +4,11 @@ import { BottomNav } from './BottomNav';
 
 export function AppLayout() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-safe pl-safe pr-safe">
+    <div className="relative min-h-screen bg-gray-50 dark:bg-gray-900 pt-safe pl-safe pr-safe">
+      <div className="grain-overlay" aria-hidden />
       <Sidebar />
-      <div className="lg:pl-64">
-        <main className="p-4 sm:p-6 lg:p-8 pb-28 lg:pb-8">
+      <div className="relative z-10 lg:pl-64">
+        <main className="p-4 sm:p-6 lg:p-10 pb-28 lg:pb-10">
           <Outlet />
         </main>
       </div>

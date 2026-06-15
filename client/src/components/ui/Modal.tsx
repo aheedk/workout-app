@@ -31,12 +31,12 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
       onClick={onClose}
     >
       <div
-        className={`w-full ${sizeClasses[size]} max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800 rounded-xl shadow-xl`}
+        className={`w-full ${sizeClasses[size]} max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl`}
         onClick={(e) => e.stopPropagation()}
       >
         {title && (
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h2>
+            <h2 className="font-display text-xl uppercase tracking-wide text-gray-900 dark:text-white">{title}</h2>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"

@@ -8,6 +8,7 @@ import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { GoalProgress } from '../components/features/GoalProgress';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
+import { PALETTES } from '../theme/palettes';
 import { useToast } from '../components/ui/Toast';
 import { useUpdateProfile, useChangePassword } from '../api/users';
 import { useBodyweightLogs, useLogBodyweight, useDeleteBodyweight } from '../api/bodyweight';
@@ -19,8 +20,8 @@ import type { Goal, CreateGoalRequest } from '@workout-app/shared';
 const CARD_CLASS =
   'bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5';
 const INPUT_CLASS =
-  'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none';
-const LABEL_CLASS = 'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1';
+  'w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors';
+const LABEL_CLASS = 'eyebrow mb-1.5 block';
 
 export function Profile() {
   const { user, logout } = useAuth();
@@ -44,7 +45,7 @@ export function Profile() {
           </p>
           <button
             onClick={() => logout()}
-            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg"
+            className="btn px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white"
           >
             Log out
           </button>
@@ -85,7 +86,7 @@ function AccountCard() {
 
   return (
     <section className={CARD_CLASS}>
-      <h2 className="font-semibold text-gray-900 dark:text-white mb-4">Account</h2>
+      <h2 className="font-display text-xl uppercase tracking-wide text-gray-900 dark:text-white mb-4">Account</h2>
       <div className="space-y-4">
         <div>
           <label className={LABEL_CLASS}>Name</label>
@@ -99,7 +100,7 @@ function AccountCard() {
             <button
               onClick={saveName}
               disabled={!nameChanged || updateProfile.isPending}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg shrink-0"
+              className="btn-primary shrink-0"
             >
               Save
             </button>
@@ -122,7 +123,7 @@ function AccountCard() {
 
 function PreferencesCard() {
   const { user, updateUser } = useAuth();
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, palette, setPalette, advancedSets, setAdvancedSets } = useTheme();
   const { showToast } = useToast();
   const updateProfile = useUpdateProfile();
 
@@ -144,7 +145,7 @@ function PreferencesCard() {
 
   return (
     <section className={CARD_CLASS}>
-      <h2 className="font-semibold text-gray-900 dark:text-white mb-4">Preferences</h2>
+      <h2 className="font-display text-xl uppercase tracking-wide text-gray-900 dark:text-white mb-4">Preferences</h2>
       <div className="space-y-4">
         <div>
           <label className={LABEL_CLASS}>Units</label>
@@ -155,7 +156,7 @@ function PreferencesCard() {
                 onClick={() => setUnit(u)}
                 className={`px-4 py-2 text-sm font-medium transition-colors ${
                   user?.unitPreference === u
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-blue-500 text-on-accent'
                     : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
                 }`}
               >
@@ -174,13 +175,69 @@ function PreferencesCard() {
                 onClick={() => setTheme(t)}
                 className={`px-4 py-2 text-sm font-medium capitalize transition-colors ${
                   theme === t
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-blue-500 text-on-accent'
                     : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
                 }`}
               >
                 {t}
               </button>
             ))}
+          </div>
+        </div>
+
+        <div>
+          <label className={LABEL_CLASS}>Color</label>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {PALETTES.map((p) => (
+              <button
+                key={p.id}
+                onClick={() => setPalette(p.id)}
+                className={`flex items-center gap-2 px-3 py-2 border text-left transition-colors ${
+                  palette === p.id
+                    ? 'border-blue-500 ring-1 ring-blue-500'
+                    : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+                }`}
+              >
+                <span
+                  className="flex h-6 w-6 shrink-0 items-center justify-center"
+                  style={{ backgroundColor: p.swatchBg }}
+                >
+                  <span className="h-2.5 w-2.5" style={{ backgroundColor: p.swatchAccent }} />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-white truncate">
+                    {p.label}
+                  </span>
+                  <span className="block text-[0.65rem] text-gray-500 dark:text-gray-400 truncate">
+                    {p.desc}
+                  </span>
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label className={LABEL_CLASS}>Advanced set types</label>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              role="switch"
+              aria-checked={advancedSets}
+              onClick={() => setAdvancedSets(!advancedSets)}
+              className={`relative inline-flex h-7 w-12 items-center transition-colors ${
+                advancedSets ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
+              }`}
+            >
+              <span
+                className={`inline-block h-5 w-5 bg-white transition-transform ${
+                  advancedSets ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+            <span className="text-sm text-gray-600 dark:text-gray-300">
+              Show Warmup / Drop set toggles while logging
+            </span>
           </div>
         </div>
       </div>
@@ -226,7 +283,7 @@ function PasswordCard() {
 
   return (
     <section className={CARD_CLASS}>
-      <h2 className="font-semibold text-gray-900 dark:text-white mb-4">Change Password</h2>
+      <h2 className="font-display text-xl uppercase tracking-wide text-gray-900 dark:text-white mb-4">Change Password</h2>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
           <label className={LABEL_CLASS}>Current password</label>
@@ -273,7 +330,7 @@ function PasswordCard() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium rounded-lg"
+          className="btn-primary"
         >
           {isSubmitting ? 'Updating…' : 'Update password'}
         </button>
@@ -327,7 +384,7 @@ function BodyweightCard({ unit }: { unit: 'kg' | 'lb' }) {
 
   return (
     <section className={CARD_CLASS}>
-      <h2 className="font-semibold text-gray-900 dark:text-white mb-4">Bodyweight</h2>
+      <h2 className="font-display text-xl uppercase tracking-wide text-gray-900 dark:text-white mb-4">Bodyweight</h2>
 
       <form onSubmit={handleAdd} className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2 mb-4">
         <div>
@@ -357,7 +414,7 @@ function BodyweightCard({ unit }: { unit: 'kg' | 'lb' }) {
           <button
             type="submit"
             disabled={logMutation.isPending || !weight}
-            className="w-full sm:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium rounded-lg"
+            className="w-full sm:w-auto btn-primary"
           >
             Log
           </button>
@@ -439,10 +496,10 @@ function GoalsCard({ unit }: { unit: 'kg' | 'lb' }) {
   return (
     <section className={CARD_CLASS}>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-semibold text-gray-900 dark:text-white">Goals</h2>
+        <h2 className="font-display text-xl uppercase tracking-wide text-gray-900 dark:text-white">Goals</h2>
         <button
           onClick={() => setIsCreating(true)}
-          className="px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg"
+          className="btn-primary px-3 py-1.5"
         >
           + New Goal
         </button>
@@ -551,7 +608,7 @@ function CreateGoalModal({
               onClick={() => setType('workouts_per_week')}
               className={`px-3 py-2 text-sm font-medium rounded-lg border ${
                 type === 'workouts_per_week'
-                  ? 'bg-blue-600 text-white border-blue-600'
+                  ? 'bg-blue-500 text-on-accent border-blue-500'
                   : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
               }`}
             >
@@ -562,7 +619,7 @@ function CreateGoalModal({
               onClick={() => setType('exercise_target')}
               className={`px-3 py-2 text-sm font-medium rounded-lg border ${
                 type === 'exercise_target'
-                  ? 'bg-blue-600 text-white border-blue-600'
+                  ? 'bg-blue-500 text-on-accent border-blue-500'
                   : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
               }`}
             >
@@ -608,14 +665,14 @@ function CreateGoalModal({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+            className="btn-ghost"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={createGoal.isPending}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium rounded-lg"
+            className="btn-primary"
           >
             {createGoal.isPending ? 'Creating…' : 'Create Goal'}
           </button>
@@ -643,7 +700,7 @@ function DataCard() {
 
   return (
     <section className={CARD_CLASS}>
-      <h2 className="font-semibold text-gray-900 dark:text-white mb-2">Data</h2>
+      <h2 className="font-display text-xl uppercase tracking-wide text-gray-900 dark:text-white mb-2">Data</h2>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
         Walks every workout in date order and recomputes your personal records.
         Use this if PRs are missing — e.g. after importing workouts or if the
@@ -652,7 +709,7 @@ function DataCard() {
       <button
         onClick={handleBackfill}
         disabled={backfill.isPending}
-        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium rounded-lg"
+        className="btn-primary"
       >
         {backfill.isPending ? 'Scanning…' : 'Recompute PRs'}
       </button>

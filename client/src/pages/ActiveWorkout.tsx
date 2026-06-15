@@ -260,18 +260,15 @@ export function ActiveWorkout() {
         }
         action={
           <div className="flex gap-2">
-            <button
-              onClick={handleCancel}
-              className="px-2 sm:px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-            >
+            <button onClick={handleCancel} className="btn-ghost px-3 py-2.5">
               Cancel
             </button>
             <button
               onClick={handleFinish}
               disabled={createWorkout.isPending}
-              className="px-3 sm:px-4 py-2 text-sm sm:text-base bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white font-medium rounded-lg whitespace-nowrap"
+              className="btn px-4 py-2.5 bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white whitespace-nowrap"
             >
-              {createWorkout.isPending ? 'Saving…' : 'Finish'}
+              {createWorkout.isPending ? 'Saving…' : 'Finish ✓'}
             </button>
           </div>
         }
@@ -283,7 +280,7 @@ export function ActiveWorkout() {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Workout name"
-          className="w-full px-4 py-3 text-lg font-medium border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+          className="w-full px-4 py-3 font-display text-2xl uppercase tracking-wide border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
         />
 
         {exercises.map((entry, i) => (
@@ -300,7 +297,7 @@ export function ActiveWorkout() {
 
         <button
           onClick={() => setPickerOpen(true)}
-          className="w-full py-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-gray-600 dark:text-gray-400 hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 font-medium"
+          className="w-full py-4 border-2 border-dashed border-gray-300 dark:border-gray-600 text-xs font-semibold uppercase tracking-label text-gray-500 dark:text-gray-400 hover:border-blue-500 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
         >
           + Add Exercise
         </button>
@@ -310,15 +307,12 @@ export function ActiveWorkout() {
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Workout notes — how did it go?"
           rows={2}
-          className="w-full px-4 py-3 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+          className="w-full px-4 py-3 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none resize-none transition-colors"
         />
 
         <div className="flex gap-2 pt-2">
-          <button
-            onClick={() => setRestTimer({ seconds: 90 })}
-            className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium"
-          >
-            Start Rest Timer
+          <button onClick={() => setRestTimer({ seconds: 90 })} className="btn-ghost px-4 py-2.5">
+            ⏱ Start Rest Timer
           </button>
         </div>
       </div>

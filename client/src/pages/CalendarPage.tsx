@@ -23,7 +23,7 @@ export function CalendarPage() {
         <Calendar onDaySelect={(date, ids) => setSelected({ date, ids })} />
 
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-          <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
+          <h3 className="font-display text-lg uppercase tracking-wide text-gray-900 dark:text-white mb-4">
             {selected
               ? parseDateString(selected.date).toLocaleDateString('en-US', {
                   weekday: 'long',
@@ -48,9 +48,9 @@ export function CalendarPage() {
                   to={`/workouts/${w.id}`}
                   className="block p-3 -mx-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
-                  <p className="font-medium text-gray-900 dark:text-white">{w.name}</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {w.exerciseCount} exercises
+                  <p className="font-display text-base uppercase tracking-wide leading-tight text-gray-900 dark:text-white">{w.name}</p>
+                  <p className="mt-1 font-mono text-xs tabular-nums text-gray-500 dark:text-gray-400">
+                    {w.exerciseCount} exercise{w.exerciseCount === 1 ? '' : 's'}
                     {w.durationMinutes != null && ` · ${formatDuration(w.durationMinutes)}`} ·{' '}
                     {w.totalVolume.toLocaleString()} {unit}
                   </p>

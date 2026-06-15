@@ -1,4 +1,5 @@
 import { useAuth } from '../../hooks/useAuth';
+import { useTheme } from '../../hooks/useTheme';
 
 export interface SetData {
   weight: number | null;
@@ -19,6 +20,7 @@ interface SetRowProps {
 
 export function SetRow({ setNumber, set, previous, onChange, onRemove }: SetRowProps) {
   const { user } = useAuth();
+  const { advancedSets } = useTheme();
   const unit = user?.unitPreference ?? 'kg';
 
   const label = set.isWarmup ? 'W' : set.isDropset ? 'D' : String(setNumber);
@@ -57,7 +59,7 @@ export function SetRow({ setNumber, set, previous, onChange, onRemove }: SetRowP
           placeholder={previous?.weight != null ? String(previous.weight) : unit}
           step={0.5}
           min={0}
-          className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+          className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm font-mono tabular-nums focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
         />
 
         <input
@@ -66,13 +68,13 @@ export function SetRow({ setNumber, set, previous, onChange, onRemove }: SetRowP
           onChange={(e) => onChange({ reps: e.target.value === '' ? null : parseInt(e.target.value) })}
           placeholder={previous?.reps != null ? String(previous.reps) : 'reps'}
           min={0}
-          className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+          className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm font-mono tabular-nums focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
         />
 
         <div className="flex items-center gap-1">
           <button
             onClick={() => onChange({ completed: !set.completed })}
-            className={`w-7 h-7 rounded flex items-center justify-center ${
+            className={`w-7 h-7 flex items-center justify-center transition-colors ${
               set.completed
                 ? 'bg-green-600 text-white'
                 : 'bg-gray-100 dark:bg-gray-700 text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
@@ -83,7 +85,7 @@ export function SetRow({ setNumber, set, previous, onChange, onRemove }: SetRowP
           </button>
           <button
             onClick={onRemove}
-            className="w-7 h-7 rounded text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 flex items-center justify-center text-lg leading-none"
+            className="w-7 h-7 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 flex items-center justify-center text-lg leading-none transition-colors"
             aria-label="Remove set"
           >
             ×
@@ -91,27 +93,29 @@ export function SetRow({ setNumber, set, previous, onChange, onRemove }: SetRowP
         </div>
       </div>
 
-      <div className="flex items-center gap-4 pl-7 pt-1.5">
-        <label className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
-          <input
-            type="checkbox"
-            checked={set.isWarmup}
-            onChange={(e) => toggleWarmup(e.target.checked)}
-            className="rounded"
-          />
-          Warmup
-        </label>
+      {advancedSets && (
+        <div className="flex items-center gap-4 pl-7 pt-1.5">
+          <label className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+            <input
+              type="checkbox"
+              checked={set.isWarmup}
+              onChange={(e) => toggleWarmup(e.target.checked)}
+              className="rounded"
+            />
+            Warmup
+          </label>
 
-        <label className="flex items-center gap-1 text-xs text-amber-700 dark:text-amber-400">
-          <input
-            type="checkbox"
-            checked={set.isDropset}
-            onChange={(e) => toggleDropset(e.target.checked)}
-            className="rounded"
-          />
-          Dropset
-        </label>
-      </div>
+          <label className="flex items-center gap-1 text-xs text-amber-700 dark:text-amber-400">
+            <input
+              type="checkbox"
+              checked={set.isDropset}
+              onChange={(e) => toggleDropset(e.target.checked)}
+              className="rounded"
+            />
+            Dropset
+          </label>
+        </div>
+      )}
     </div>
   );
 }

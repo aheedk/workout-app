@@ -3,6 +3,7 @@ import { SetRow, type SetData } from './SetRow';
 import { ExerciseHistoryModal } from './ExerciseHistoryModal';
 import { useExerciseHistory } from '../../api/exercises';
 import { useAuth } from '../../hooks/useAuth';
+import { useTheme } from '../../hooks/useTheme';
 
 export interface ExerciseEntryData {
   exerciseId: string;
@@ -37,6 +38,7 @@ export function ExerciseEntry({ entry, onChange, onRemove, onSetComplete, onMove
   const [collapsed, setCollapsed] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const { user } = useAuth();
+  const { advancedSets } = useTheme();
   const unit = user?.unitPreference ?? 'kg';
   const { data: history } = useExerciseHistory(entry.exerciseId);
 
@@ -127,10 +129,12 @@ export function ExerciseEntry({ entry, onChange, onRemove, onSetComplete, onMove
     <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
       <div className="flex items-start justify-between gap-2 mb-3">
         <button onClick={() => setCollapsed(!collapsed)} className="text-left flex-1 min-w-0">
-          <h3 className="font-semibold text-gray-900 dark:text-white">{entry.exerciseName}</h3>
+          <h3 className="font-display text-lg uppercase tracking-wide leading-tight text-gray-900 dark:text-white">
+            {entry.exerciseName}
+          </h3>
           {previousBest && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-              Previous best: {previousBest.weight} {unit} × {previousBest.reps}
+            <p className="eyebrow mt-1">
+              Prev best: {previousBest.weight} {unit} × {previousBest.reps}
             </p>
           )}
         </button>
@@ -205,20 +209,22 @@ export function ExerciseEntry({ entry, onChange, onRemove, onSetComplete, onMove
               );
             })}
           </div>
-          <div className="mt-2 grid grid-cols-2 gap-2">
+          <div className={`mt-2 grid gap-2 ${advancedSets ? 'grid-cols-2' : 'grid-cols-1'}`}>
             <button
               onClick={handleAddSet}
               className="py-2 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg"
             >
               + Add Set
             </button>
-            <button
-              onClick={handleAddDropset}
-              disabled={entry.sets.length === 0}
-              className="py-2 text-sm font-medium text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 disabled:opacity-50 rounded-lg"
-            >
-              + Drop
-            </button>
+            {advancedSets && (
+              <button
+                onClick={handleAddDropset}
+                disabled={entry.sets.length === 0}
+                className="py-2 text-sm font-medium text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 disabled:opacity-50 rounded-lg"
+              >
+                + Drop
+              </button>
+            )}
           </div>
 
           <textarea

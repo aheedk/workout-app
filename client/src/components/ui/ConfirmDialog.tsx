@@ -25,16 +25,13 @@ export function ConfirmDialog({
     <Modal isOpen={isOpen} onClose={onCancel} title={title} size="sm">
       <p className="text-gray-600 dark:text-gray-400 mb-6">{message}</p>
       <div className="flex justify-end gap-3">
-        <button
-          onClick={onCancel}
-          className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-        >
+        <button onClick={onCancel} className="btn-ghost">
           {cancelLabel}
         </button>
         <button
           onClick={onConfirm}
-          className={`px-4 py-2 text-white rounded-lg ${
-            danger ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'
+          className={`btn px-4 py-2.5 ${
+            danger ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-on-accent'
           }`}
         >
           {confirmLabel}

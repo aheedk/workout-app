@@ -12,12 +12,16 @@ import { useGoals } from '../api/goals';
 import { useRoutines } from '../api/routines';
 import { useWorkouts } from '../api/workouts';
 import { useAuth } from '../hooks/useAuth';
-import { formatDuration, formatDurationTimer, formatRelativeDate } from '../utils/formatting';
+import { useTheme } from '../hooks/useTheme';
+import { chartColors } from '../theme/palettes';
+import { formatDuration, formatDurationTimer, formatRelativeDate, parseDateString } from '../utils/formatting';
 import { loadActiveWorkout, type ActiveWorkoutSnapshot } from '../utils/activeWorkoutStorage';
 import { BarChart, Bar, ResponsiveContainer, Tooltip } from 'recharts';
 
 export function Dashboard() {
   const { user } = useAuth();
+  const { palette, resolvedTheme } = useTheme();
+  const chart = chartColors(palette, resolvedTheme);
   const { data: summary, isLoading: loadingSummary } = useSummary();
   const { data: streaks } = useStreaks();
   const { data: volume } = useVolume(6);
@@ -59,11 +63,11 @@ export function Dashboard() {
         action={
           <Link
             to="/workouts/active"
-            className={`px-3 sm:px-4 py-2 text-white text-sm sm:text-base font-medium rounded-lg whitespace-nowrap ${
-              paused ? 'bg-amber-600 hover:bg-amber-700' : 'bg-blue-600 hover:bg-blue-700'
+            className={`btn px-4 py-2.5 whitespace-nowrap ${
+              paused ? 'bg-amber-600 hover:bg-amber-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-on-accent'
             }`}
           >
-            {paused ? 'Resume Workout' : 'Start Workout'}
+            {paused ? 'Resume Workout' : 'Start Workout'} <span aria-hidden>→</span>
           </Link>
         }
       />
@@ -92,7 +96,7 @@ export function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-gray-900 dark:text-white">Last Workout</h3>
+            <h3 className="eyebrow">Last Workout</h3>
             <Link to="/workouts" className="text-sm text-blue-600 dark:text-blue-400 hover:underline">
               History
             </Link>
@@ -104,10 +108,10 @@ export function Dashboard() {
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
-                  <p className="font-semibold text-gray-900 dark:text-white truncate">{recent.name}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    {formatRelativeDate(recent.date)}
+                  <p className="font-display text-xl uppercase tracking-wide leading-tight text-gray-900 dark:text-white truncate">
+                    {recent.name}
                   </p>
+                  <p className="eyebrow mt-1">{formatRelativeDate(recent.date)}</p>
                 </div>
                 {recent.hasPr && <PRBadge size="sm" />}
               </div>
@@ -150,7 +154,7 @@ export function Dashboard() {
 
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-gray-900 dark:text-white">Favorite Routines</h3>
+            <h3 className="eyebrow">Favorite Routines</h3>
             <Link to="/routines" className="text-sm text-blue-600 dark:text-blue-400 hover:underline">
               View all
             </Link>
@@ -176,7 +180,7 @@ export function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
         <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Active Goals</h3>
+            <h3 className="eyebrow">Active Goals</h3>
             <Link to="/profile" className="text-xs text-blue-600 dark:text-blue-400 hover:underline">
               Manage
             </Link>
@@ -203,7 +207,7 @@ export function Dashboard() {
 
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Volume trend</h3>
+            <h3 className="eyebrow">Volume trend</h3>
             <Link to="/analytics" className="text-xs text-blue-600 dark:text-blue-400 hover:underline">
               Details
             </Link>
@@ -213,12 +217,12 @@ export function Dashboard() {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={volume} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
                   <Tooltip
-                    cursor={{ fill: 'rgba(59,130,246,0.1)' }}
-                    contentStyle={{ backgroundColor: 'rgba(30,41,59,0.95)', border: 'none', borderRadius: 8, color: '#fff', fontSize: 12 }}
+                    cursor={{ fill: chart.accent, fillOpacity: 0.1 }}
+                    contentStyle={{ backgroundColor: chart.tooltipBg, border: `1px solid ${chart.tooltipBorder}`, borderRadius: 2, color: chart.tooltipFg, fontSize: 12 }}
                     formatter={(v: number) => [`${v.toLocaleString()} ${unit}`, 'Volume']}
-                    labelFormatter={(l) => new Date(l).toLocaleDateString()}
+                    labelFormatter={(l) => parseDateString(String(l)).toLocaleDateString()}
                   />
-                  <Bar dataKey="volume" fill="#3b82f6" radius={[2, 2, 0, 0]} />
+                  <Bar dataKey="volume" fill={chart.accent} radius={[2, 2, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -240,8 +244,10 @@ export function Dashboard() {
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
     <div>
-      <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
-      <p className="font-medium text-gray-900 dark:text-white text-sm">{value}</p>
+      <p className="eyebrow">{label}</p>
+      <p className="mt-1 font-mono font-semibold tabular-nums text-gray-900 dark:text-white text-sm">
+        {value}
+      </p>
     </div>
   );
 }

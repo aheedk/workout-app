@@ -11,25 +11,32 @@ export function WorkoutCard({ workout }: { workout: WorkoutSummary }) {
   return (
     <Link
       to={`/workouts/${workout.id}`}
-      className="block bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:border-blue-400 dark:hover:border-blue-500 transition-colors"
+      className="group relative block plate p-4 pl-5 hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
     >
+      {/* Left accent bar that ignites on hover. */}
+      <span
+        className="absolute left-0 inset-y-0 w-[3px] bg-blue-500 scale-y-0 group-hover:scale-y-100 origin-center transition-transform"
+        aria-hidden
+      />
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="font-semibold text-gray-900 dark:text-white truncate">{workout.name}</h3>
+            <h3 className="font-display text-lg uppercase tracking-wide leading-tight text-gray-900 dark:text-white truncate">
+              {workout.name}
+            </h3>
             {workout.hasPr && <PRBadge />}
           </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{formatDate(workout.date)}</p>
+          <p className="eyebrow mt-1">{formatDate(workout.date)}</p>
         </div>
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-600 dark:text-gray-400">
+      <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 font-mono text-sm tabular-nums text-gray-600 dark:text-gray-300">
         <span>
           {workout.exerciseCount} exercise{workout.exerciseCount === 1 ? '' : 's'}
         </span>
         {workout.durationMinutes != null && <span>{formatDuration(workout.durationMinutes)}</span>}
         <span>
-          {workout.totalVolume.toLocaleString()} {unit} volume
+          {workout.totalVolume.toLocaleString()} {unit}
         </span>
       </div>
 
@@ -38,7 +45,7 @@ export function WorkoutCard({ workout }: { workout: WorkoutSummary }) {
           {workout.tags.map((tag) => (
             <span
               key={tag}
-              className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded"
+              className="text-[0.65rem] font-semibold uppercase tracking-wider px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
             >
               {tag}
             </span>
