@@ -291,27 +291,38 @@ async function detectAndUpdatePRs(userId: string, exerciseId: string, sets: any[
     for (const check of checks) {
       if (check.value <= 0) continue;
 
-      const existing = await prisma.personalRecord.findFirst({
+      // Compare against the account's BEST record for this exercise + type —
+      // ordered by value, not an arbitrary findFirst. Otherwise a stale or
+      // duplicate lower record could let a sub-best lift register as a PR.
+      const records = await prisma.personalRecord.findMany({
         where: { userId, exerciseId, recordType: check.type },
+        orderBy: { value: 'desc' },
       });
+      const best = records[0];
 
-      if (!existing || check.value > Number(existing.value)) {
-        await prisma.personalRecord.upsert({
-          where: existing ? { id: existing.id } : { id: 'non-existent' },
-          create: {
-            userId,
-            exerciseId,
-            workoutSetId: set.id,
-            recordType: check.type,
-            value: check.value,
-            achievedAt: workoutDate,
-          },
-          update: {
-            workoutSetId: set.id,
-            value: check.value,
-            achievedAt: workoutDate,
-          },
-        });
+      if (!best || check.value > Number(best.value)) {
+        if (best) {
+          await prisma.personalRecord.update({
+            where: { id: best.id },
+            data: { workoutSetId: set.id, value: check.value, achievedAt: workoutDate },
+          });
+          // Collapse any leftover duplicate rows into the one we just updated.
+          const stale = records.slice(1).map((r) => r.id);
+          if (stale.length) {
+            await prisma.personalRecord.deleteMany({ where: { id: { in: stale } } });
+          }
+        } else {
+          await prisma.personalRecord.create({
+            data: {
+              userId,
+              exerciseId,
+              workoutSetId: set.id,
+              recordType: check.type,
+              value: check.value,
+              achievedAt: workoutDate,
+            },
+          });
+        }
 
         // Mark set as PR
         await prisma.workoutSet.update({

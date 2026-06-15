@@ -5,16 +5,20 @@ export function BottomNav() {
 
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-800/95 backdrop-blur border-t border-gray-200 dark:border-gray-700 z-50 pb-safe">
-      <div className="flex items-center justify-around h-16">
+      {/* Five equal-width columns so the center FAB sits on the true page
+          center — justify-around drifts it with variable label widths. */}
+      <div className="flex items-center h-16">
         <NavItem to="/" label="Home" icon={HomeIcon} />
         <NavItem to="/workouts" label="Log" icon={DumbbellIcon} />
-        <button
-          onClick={() => navigate('/workouts/active')}
-          aria-label="Start workout"
-          className="flex flex-col items-center justify-center -mt-5 w-14 h-14 bg-blue-500 text-on-accent shadow-lg shadow-blue-500/30 hover:bg-blue-600 active:scale-95 transition-all"
-        >
-          <PlusIcon />
-        </button>
+        <div className="flex flex-1 justify-center">
+          <button
+            onClick={() => navigate('/workouts/active')}
+            aria-label="Start workout"
+            className="flex flex-col items-center justify-center -mt-5 w-14 h-14 bg-blue-500 text-on-accent shadow-lg shadow-blue-500/30 hover:bg-blue-600 active:scale-95 transition-all"
+          >
+            <PlusIcon />
+          </button>
+        </div>
         <NavItem to="/calendar" label="Calendar" icon={CalendarIcon} />
         <NavItem to="/profile" label="Profile" icon={UserIcon} />
       </div>
@@ -36,7 +40,7 @@ function NavItem({
       to={to}
       end={to === '/'}
       className={({ isActive }) =>
-        `flex flex-col items-center gap-0.5 text-[0.6rem] font-semibold uppercase tracking-wider ${
+        `flex flex-1 min-w-0 flex-col items-center gap-0.5 text-[0.6rem] font-semibold uppercase tracking-wider ${
           isActive
             ? 'text-blue-500'
             : 'text-gray-500 dark:text-gray-400'

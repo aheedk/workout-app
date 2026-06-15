@@ -10,8 +10,8 @@ export default defineConfig({
       injectRegister: 'auto',
       includeAssets: ['icon.svg', 'apple-touch-icon-180x180.png'],
       manifest: {
-        name: 'Workout Tracker',
-        short_name: 'Workout',
+        name: 'LIFT — Workout Tracker',
+        short_name: 'LIFT',
         description: 'Log workouts, track routines, and analyze your lifting progress.',
         theme_color: '#2563eb',
         background_color: '#0f172a',

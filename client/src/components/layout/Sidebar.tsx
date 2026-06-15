@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { LogoMark, APP_NAME } from '../ui/Logo';
 
 const navItems = [
   { to: '/', label: 'Dashboard', icon: HomeIcon },
@@ -13,11 +14,9 @@ export function Sidebar() {
   return (
     <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 z-20 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
       <div className="flex items-center gap-3 h-20 px-6 border-b border-gray-200 dark:border-gray-700">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center bg-gray-900 dark:bg-gray-50">
-          <span className="font-display text-2xl leading-none text-blue-500 -mt-0.5">L</span>
-        </span>
-        <span className="font-display text-xl leading-[0.92] tracking-wide text-gray-900 dark:text-white">
-          IRON<br />LEDGER
+        <LogoMark className="h-8 w-8 shrink-0 text-blue-500" />
+        <span className="font-display text-3xl leading-none tracking-wide text-gray-900 dark:text-white">
+          {APP_NAME}
         </span>
       </div>
       <nav className="flex-1 px-3 py-6 space-y-0.5">

@@ -172,7 +172,7 @@ model PersonalRecord {
   exercise    Exercise    @relation(fields: [exerciseId], references: [id])
   workoutSet  WorkoutSet? @relation(fields: [workoutSetId], references: [id], onDelete: SetNull)
 
-  @@index([userId, exerciseId, recordType])
+  @@unique([userId, exerciseId, recordType])
   @@map("personal_records")
 }
 
