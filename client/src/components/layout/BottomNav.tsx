@@ -11,7 +11,7 @@ export function BottomNav() {
         <button
           onClick={() => navigate('/workouts/active')}
           aria-label="Start workout"
-          className="flex flex-col items-center justify-center -mt-5 w-14 h-14 bg-blue-500 text-white shadow-lg shadow-blue-500/30 hover:bg-blue-600 active:scale-95 transition-all"
+          className="flex flex-col items-center justify-center -mt-5 w-14 h-14 bg-blue-500 text-on-accent shadow-lg shadow-blue-500/30 hover:bg-blue-600 active:scale-95 transition-all"
         >
           <PlusIcon />
         </button>

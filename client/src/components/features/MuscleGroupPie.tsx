@@ -1,9 +1,12 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import type { MuscleGroupData } from '@workout-app/shared';
-
-const COLORS = ['#f95f11', '#37342e', '#9b9587', '#ff7a33', '#bd3f06', '#c3beaf', '#56514a', '#ffc7a0'];
+import { useTheme } from '../../hooks/useTheme';
+import { chartColors } from '../../theme/palettes';
 
 export function MuscleGroupPie({ data }: { data: MuscleGroupData[] }) {
+  const { palette, resolvedTheme } = useTheme();
+  const c = chartColors(palette, resolvedTheme);
+
   if (!data || data.length === 0) {
     return (
       <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-8">
@@ -29,16 +32,11 @@ export function MuscleGroupPie({ data }: { data: MuscleGroupData[] }) {
             labelLine={false}
           >
             {data.map((_, i) => (
-              <Cell key={i} fill={COLORS[i % COLORS.length]} />
+              <Cell key={i} fill={c.pie[i % c.pie.length]} />
             ))}
           </Pie>
           <Tooltip
-            contentStyle={{
-              backgroundColor: '#151413',
-              border: 'none',
-              borderRadius: 2,
-              color: '#fff',
-            }}
+            contentStyle={{ backgroundColor: c.tooltipBg, border: `1px solid ${c.tooltipBorder}`, borderRadius: 2, color: c.tooltipFg }}
             formatter={(v: number, _name, item) => [
               `${v} sets (${(item.payload as MuscleGroupData).percentage.toFixed(0)}%)`,
               (item.payload as MuscleGroupData).muscleGroup,

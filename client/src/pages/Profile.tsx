@@ -8,6 +8,7 @@ import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { GoalProgress } from '../components/features/GoalProgress';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
+import { PALETTES } from '../theme/palettes';
 import { useToast } from '../components/ui/Toast';
 import { useUpdateProfile, useChangePassword } from '../api/users';
 import { useBodyweightLogs, useLogBodyweight, useDeleteBodyweight } from '../api/bodyweight';
@@ -122,7 +123,7 @@ function AccountCard() {
 
 function PreferencesCard() {
   const { user, updateUser } = useAuth();
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, palette, setPalette, advancedSets, setAdvancedSets } = useTheme();
   const { showToast } = useToast();
   const updateProfile = useUpdateProfile();
 
@@ -155,7 +156,7 @@ function PreferencesCard() {
                 onClick={() => setUnit(u)}
                 className={`px-4 py-2 text-sm font-medium transition-colors ${
                   user?.unitPreference === u
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-blue-500 text-on-accent'
                     : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
                 }`}
               >
@@ -174,13 +175,69 @@ function PreferencesCard() {
                 onClick={() => setTheme(t)}
                 className={`px-4 py-2 text-sm font-medium capitalize transition-colors ${
                   theme === t
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-blue-500 text-on-accent'
                     : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
                 }`}
               >
                 {t}
               </button>
             ))}
+          </div>
+        </div>
+
+        <div>
+          <label className={LABEL_CLASS}>Color</label>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {PALETTES.map((p) => (
+              <button
+                key={p.id}
+                onClick={() => setPalette(p.id)}
+                className={`flex items-center gap-2 px-3 py-2 border text-left transition-colors ${
+                  palette === p.id
+                    ? 'border-blue-500 ring-1 ring-blue-500'
+                    : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+                }`}
+              >
+                <span
+                  className="flex h-6 w-6 shrink-0 items-center justify-center"
+                  style={{ backgroundColor: p.swatchBg }}
+                >
+                  <span className="h-2.5 w-2.5" style={{ backgroundColor: p.swatchAccent }} />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-white truncate">
+                    {p.label}
+                  </span>
+                  <span className="block text-[0.65rem] text-gray-500 dark:text-gray-400 truncate">
+                    {p.desc}
+                  </span>
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label className={LABEL_CLASS}>Advanced set types</label>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              role="switch"
+              aria-checked={advancedSets}
+              onClick={() => setAdvancedSets(!advancedSets)}
+              className={`relative inline-flex h-7 w-12 items-center transition-colors ${
+                advancedSets ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
+              }`}
+            >
+              <span
+                className={`inline-block h-5 w-5 bg-white transition-transform ${
+                  advancedSets ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+            <span className="text-sm text-gray-600 dark:text-gray-300">
+              Show Warmup / Drop set toggles while logging
+            </span>
           </div>
         </div>
       </div>
@@ -551,7 +608,7 @@ function CreateGoalModal({
               onClick={() => setType('workouts_per_week')}
               className={`px-3 py-2 text-sm font-medium rounded-lg border ${
                 type === 'workouts_per_week'
-                  ? 'bg-blue-600 text-white border-blue-600'
+                  ? 'bg-blue-500 text-on-accent border-blue-500'
                   : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
               }`}
             >
@@ -562,7 +619,7 @@ function CreateGoalModal({
               onClick={() => setType('exercise_target')}
               className={`px-3 py-2 text-sm font-medium rounded-lg border ${
                 type === 'exercise_target'
-                  ? 'bg-blue-600 text-white border-blue-600'
+                  ? 'bg-blue-500 text-on-accent border-blue-500'
                   : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
               }`}
             >

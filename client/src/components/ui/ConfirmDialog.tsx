@@ -30,8 +30,8 @@ export function ConfirmDialog({
         </button>
         <button
           onClick={onConfirm}
-          className={`btn px-4 py-2.5 text-white ${
-            danger ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-500 hover:bg-blue-600'
+          className={`btn px-4 py-2.5 ${
+            danger ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-on-accent'
           }`}
         >
           {confirmLabel}

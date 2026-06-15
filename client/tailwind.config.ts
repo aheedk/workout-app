@@ -1,35 +1,20 @@
 import type { Config } from 'tailwindcss';
 
-// "Iron Ledger" theme. The app's components reference Tailwind's `gray` and
-// `blue` scales throughout; we re-point those names at the theme palette so
-// the whole app reads from one place: warm iron/chalk neutrals and a single
-// hot signal-orange accent.
-const iron = {
-  50: '#f5f3ee', // chalk paper
-  100: '#ece9e1',
-  200: '#dcd8cc',
-  300: '#c3beaf',
-  400: '#9b9587',
-  500: '#767164',
-  600: '#56514a',
-  700: '#37342e',
-  800: '#232120',
-  900: '#151413',
-  950: '#0d0c0b',
-};
-
-const signal = {
-  50: '#fff3ea',
-  100: '#ffe4d0',
-  200: '#ffc7a0',
-  300: '#ffa067',
-  400: '#ff7a33',
-  500: '#f95f11',
-  600: '#e44e06',
-  700: '#bd3f06',
-  800: '#96340b',
-  900: '#7a2d0e',
-};
+// "Iron Ledger" theme. The app references Tailwind's `gray` and `blue` scales
+// throughout; we re-point those names at CSS variables (defined per palette in
+// index.css under [data-palette]) so the entire palette is swappable at runtime.
+const grayScale = Object.fromEntries(
+  [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950].map((s) => [
+    s,
+    `rgb(var(--g-${s}) / <alpha-value>)`,
+  ])
+);
+const accentScale = Object.fromEntries(
+  [50, 100, 200, 300, 400, 500, 600, 700, 800, 900].map((s) => [
+    s,
+    `rgb(var(--a-${s}) / <alpha-value>)`,
+  ])
+);
 
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
@@ -37,8 +22,8 @@ export default {
   theme: {
     extend: {
       colors: {
-        gray: iron,
-        blue: signal,
+        gray: grayScale,
+        blue: accentScale,
       },
       fontFamily: {
         sans: ['Archivo', 'system-ui', 'sans-serif'],

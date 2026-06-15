@@ -3,11 +3,202 @@
 @tailwind utilities;
 
 /* ============================================================
-   IRON LEDGER — an industrial training-log aesthetic.
-   Poster-condensed display type, monospaced numerals, warm
-   iron/chalk neutrals, one hot signal-orange accent, hard
-   edges, hairline rules, and a faint paper/metal grain.
+   IRON LEDGER — industrial training-log UI.
+   Palettes are runtime-swappable: Tailwind's `gray` and `blue`
+   scales resolve to CSS variables (--g-* / --a-*), and a
+   [data-palette] attribute on <html> selects the values below.
+   Default palette is Mono / Blackout. `.dark` flips which end of
+   each ramp is used (handled by Tailwind dark: variants).
    ============================================================ */
+
+:root, [data-palette='mono'] {
+  --g-50: 250 250 250;
+  --g-100: 244 244 245;
+  --g-200: 228 228 231;
+  --g-300: 212 212 216;
+  --g-400: 161 161 170;
+  --g-500: 113 113 122;
+  --g-600: 82 82 91;
+  --g-700: 48 48 52;
+  --g-800: 27 27 29;
+  --g-900: 17 17 19;
+  --g-950: 10 10 11;
+  --a-50: 244 244 245;
+  --a-100: 231 231 234;
+  --a-200: 208 208 213;
+  --a-300: 168 168 176;
+  --a-400: 92 92 99;
+  --a-500: 28 28 31;
+  --a-600: 18 18 20;
+  --a-700: 12 12 14;
+  --a-800: 8 8 10;
+  --a-900: 5 5 6;
+  --a-fg: 250 250 250;
+}
+
+.dark[data-palette='mono'] {
+  --a-50: 63 63 70;
+  --a-100: 39 39 42;
+  --a-200: 63 63 70;
+  --a-300: 82 82 91;
+  --a-400: 161 161 170;
+  --a-500: 250 250 250;
+  --a-600: 228 228 231;
+  --a-700: 212 212 216;
+  --a-800: 161 161 170;
+  --a-900: 113 113 122;
+  --a-fg: 10 10 11;
+}
+
+[data-palette='iron'] {
+  --g-50: 245 243 238;
+  --g-100: 236 233 225;
+  --g-200: 220 216 204;
+  --g-300: 195 190 175;
+  --g-400: 155 149 135;
+  --g-500: 118 113 100;
+  --g-600: 86 81 74;
+  --g-700: 55 52 46;
+  --g-800: 35 33 32;
+  --g-900: 21 20 19;
+  --g-950: 13 12 11;
+  --a-50: 255 243 234;
+  --a-100: 255 228 208;
+  --a-200: 255 199 160;
+  --a-300: 255 160 103;
+  --a-400: 255 122 51;
+  --a-500: 249 95 17;
+  --a-600: 228 78 6;
+  --a-700: 189 63 6;
+  --a-800: 150 52 11;
+  --a-900: 122 45 14;
+  --a-fg: 255 255 255;
+}
+
+[data-palette='blueprint'] {
+  --g-50: 238 242 248;
+  --g-100: 226 232 242;
+  --g-200: 201 211 227;
+  --g-300: 159 176 201;
+  --g-400: 107 125 153;
+  --g-500: 74 90 118;
+  --g-600: 56 70 95;
+  --g-700: 39 50 73;
+  --g-800: 22 29 43;
+  --g-900: 12 16 24;
+  --g-950: 7 10 16;
+  --a-50: 238 243 255;
+  --a-100: 219 229 255;
+  --a-200: 184 203 255;
+  --a-300: 138 168 255;
+  --a-400: 107 144 255;
+  --a-500: 79 124 255;
+  --a-600: 58 99 230;
+  --a-700: 47 79 189;
+  --a-800: 41 64 148;
+  --a-900: 37 56 122;
+  --a-fg: 255 255 255;
+}
+
+[data-palette='crimson'] {
+  --g-50: 246 244 243;
+  --g-100: 236 234 232;
+  --g-200: 218 215 212;
+  --g-300: 184 180 176;
+  --g-400: 138 134 130;
+  --g-500: 101 97 93;
+  --g-600: 75 72 69;
+  --g-700: 49 49 51;
+  --g-800: 29 29 31;
+  --g-900: 18 18 18;
+  --g-950: 10 10 10;
+  --a-50: 254 242 242;
+  --a-100: 253 224 225;
+  --a-200: 251 196 199;
+  --a-300: 247 154 160;
+  --a-400: 241 91 100;
+  --a-500: 225 29 42;
+  --a-600: 193 20 32;
+  --a-700: 159 19 29;
+  --a-800: 132 20 29;
+  --a-900: 110 21 28;
+  --a-fg: 255 255 255;
+}
+
+[data-palette='emerald'] {
+  --g-50: 238 243 240;
+  --g-100: 224 233 228;
+  --g-200: 198 212 204;
+  --g-300: 155 176 165;
+  --g-400: 106 125 114;
+  --g-500: 74 90 81;
+  --g-600: 56 69 62;
+  --g-700: 42 48 44;
+  --g-800: 22 26 24;
+  --g-900: 13 15 14;
+  --g-950: 7 9 8;
+  --a-50: 233 253 243;
+  --a-100: 201 249 224;
+  --a-200: 149 241 196;
+  --a-300: 88 227 163;
+  --a-400: 37 207 133;
+  --a-500: 16 217 119;
+  --a-600: 11 180 99;
+  --a-700: 12 142 80;
+  --a-800: 14 112 66;
+  --a-900: 13 92 56;
+  --a-fg: 6 20 13;
+}
+
+[data-palette='olive'] {
+  --g-50: 241 240 232;
+  --g-100: 231 229 216;
+  --g-200: 211 208 189;
+  --g-300: 170 168 136;
+  --g-400: 130 129 95;
+  --g-500: 95 94 68;
+  --g-600: 71 71 51;
+  --g-700: 58 61 41;
+  --g-800: 32 34 26;
+  --g-900: 20 21 15;
+  --g-950: 13 14 9;
+  --a-50: 251 246 232;
+  --a-100: 246 235 198;
+  --a-200: 236 215 143;
+  --a-300: 221 192 99;
+  --a-400: 208 174 71;
+  --a-500: 200 162 58;
+  --a-600: 169 132 44;
+  --a-700: 133 102 38;
+  --a-800: 107 82 36;
+  --a-900: 90 69 34;
+  --a-fg: 20 21 15;
+}
+
+[data-palette='ultraviolet'] {
+  --g-50: 243 240 248;
+  --g-100: 233 228 241;
+  --g-200: 212 202 227;
+  --g-300: 176 163 201;
+  --g-400: 132 118 153;
+  --g-500: 95 82 118;
+  --g-600: 72 59 95;
+  --g-700: 46 36 64;
+  --g-800: 26 20 38;
+  --g-900: 15 11 22;
+  --g-950: 8 6 13;
+  --a-50: 245 239 255;
+  --a-100: 234 221 255;
+  --a-200: 216 192 255;
+  --a-300: 191 152 255;
+  --a-400: 171 120 255;
+  --a-500: 157 92 255;
+  --a-600: 129 56 230;
+  --a-700: 106 43 189;
+  --a-800: 87 38 154;
+  --a-900: 72 35 122;
+  --a-fg: 255 255 255;
+}
 
 @layer base {
   html {
@@ -25,64 +216,36 @@
     @apply font-sans text-gray-900 dark:text-gray-100;
   }
 
-  /* Display type: poster-condensed, tightened, slightly tracked. */
-  .font-display {
-    font-feature-settings: 'kern' 1;
-    letter-spacing: 0.005em;
-  }
+  .font-display { font-feature-settings: 'kern' 1; letter-spacing: 0.005em; }
+  .font-mono { font-variant-numeric: tabular-nums; }
 
-  /* Tabular figures everywhere numbers matter — weights, reps, timers. */
-  .font-mono {
-    font-variant-numeric: tabular-nums;
-  }
+  ::selection { background: rgb(var(--a-500)); color: rgb(var(--a-fg)); }
 
-  ::selection {
-    background: #f95f11;
-    color: #fff;
-  }
-
-  /* Thin, theme-matched scrollbars. */
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: theme('colors.gray.300') transparent;
-  }
-  .dark * {
-    scrollbar-color: theme('colors.gray.700') transparent;
-  }
-  ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-  }
+  * { scrollbar-width: thin; scrollbar-color: rgb(var(--g-300)) transparent; }
+  .dark * { scrollbar-color: rgb(var(--g-700)) transparent; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
   ::-webkit-scrollbar-thumb {
-    @apply bg-gray-300 dark:bg-gray-700;
-    border: 3px solid transparent;
-    background-clip: content-box;
-    border-radius: 999px;
+    background: rgb(var(--g-300)); border: 3px solid transparent;
+    background-clip: content-box; border-radius: 999px;
   }
-  ::-webkit-scrollbar-thumb:hover {
-    @apply bg-gray-400 dark:bg-gray-600;
-    border: 3px solid transparent;
-    background-clip: content-box;
-  }
+  .dark ::-webkit-scrollbar-thumb { background: rgb(var(--g-700)); background-clip: content-box; border: 3px solid transparent; }
 }
 
 @layer components {
-  /* Tracked, uppercase micro-label — the "THIS WEEK" / "VOLUME" style. */
   .eyebrow {
     @apply text-[0.68rem] font-semibold uppercase tracking-label text-gray-500 dark:text-gray-400;
   }
 
-  /* The signature surface: a hard-edged iron plate with a hairline frame. */
   .plate {
     @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700;
   }
 
-  /* Industrial buttons — uppercase, tracked, hard-edged. */
   .btn {
     @apply inline-flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-label transition-colors disabled:opacity-60 disabled:cursor-not-allowed;
   }
   .btn-primary {
-    @apply btn bg-blue-500 text-white hover:bg-blue-600 px-4 py-2.5;
+    @apply btn bg-blue-500 hover:bg-blue-600 px-4 py-2.5;
+    color: rgb(var(--a-fg));
   }
   .btn-ghost {
     @apply btn border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-gray-400 hover:text-gray-900 dark:hover:border-gray-500 dark:hover:text-white px-4 py-2.5;
@@ -90,65 +253,30 @@
 }
 
 @layer utilities {
-  .pt-safe {
-    padding-top: env(safe-area-inset-top);
-  }
-  .pb-safe {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  .pl-safe {
-    padding-left: env(safe-area-inset-left);
-  }
-  .pr-safe {
-    padding-right: env(safe-area-inset-right);
-  }
+  .pt-safe { padding-top: env(safe-area-inset-top); }
+  .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+  .pl-safe { padding-left: env(safe-area-inset-left); }
+  .pr-safe { padding-right: env(safe-area-inset-right); }
 
-  /* Faint film grain — fixed, non-interactive, sits above the page bg. */
+  /* Foreground color that sits legibly on the accent fill. */
+  .text-on-accent { color: rgb(var(--a-fg)); }
+
   .grain-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    opacity: 0.035;
+    position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.035;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
-  .dark .grain-overlay {
-    opacity: 0.06;
-  }
+  .dark .grain-overlay { opacity: 0.06; }
 
-  /* Hairline ruled background — faint horizontal lines, like a ledger page.
-     Used behind hero panels for texture. */
   .ledger-lines {
-    background-image: repeating-linear-gradient(
-      to bottom,
-      transparent 0,
-      transparent 31px,
-      theme('colors.gray.200') 31px,
-      theme('colors.gray.200') 32px
-    );
+    background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 31px, rgb(var(--g-200)) 31px, rgb(var(--g-200)) 32px);
   }
   .dark .ledger-lines {
-    background-image: repeating-linear-gradient(
-      to bottom,
-      transparent 0,
-      transparent 31px,
-      theme('colors.gray.800') 31px,
-      theme('colors.gray.800') 32px
-    );
+    background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 31px, rgb(var(--g-800)) 31px, rgb(var(--g-800)) 32px);
   }
 
-  /* Staggered entrance for page loads. */
   @keyframes plate-in {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
-  .animate-plate-in {
-    animation: plate-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
+  .animate-plate-in { animation: plate-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
 }

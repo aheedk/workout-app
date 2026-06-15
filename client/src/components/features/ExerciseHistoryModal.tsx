@@ -7,6 +7,8 @@ import { PRBadge } from './PRBadge';
 import { useExerciseHistory, useExerciseRecords, useBackfillRecords } from '../../api/exercises';
 import { useAuth } from '../../hooks/useAuth';
 import { useToast } from '../ui/Toast';
+import { useTheme } from '../../hooks/useTheme';
+import { chartColors } from '../../theme/palettes';
 import { formatDate, parseDateString } from '../../utils/formatting';
 import type { ExerciseHistory, PersonalRecord } from '@workout-app/shared';
 
@@ -248,6 +250,8 @@ function metricSuffix(metric: Metric, unit: 'kg' | 'lb'): string {
 
 function ProgressGraph({ history, unit }: { history: ExerciseHistory[]; unit: 'kg' | 'lb' }) {
   const [metric, setMetric] = useState<Metric>('est_1rm');
+  const { palette, resolvedTheme } = useTheme();
+  const c = chartColors(palette, resolvedTheme);
 
   const data = useMemo(() => {
     return history
@@ -285,28 +289,28 @@ function ProgressGraph({ history, unit }: { history: ExerciseHistory[]; unit: 'k
         <div className="h-48">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={data} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#dcd8cc" className="dark:opacity-20" />
+              <CartesianGrid strokeDasharray="3 3" stroke={c.grid} />
               <XAxis
                 dataKey="date"
                 tickFormatter={(v) =>
                   parseDateString(String(v)).toLocaleDateString('en', { month: 'short', day: 'numeric' })
                 }
-                tick={{ fontSize: 10, fill: '#9b9587' }}
+                tick={{ fontSize: 10, fill: c.axis }}
                 axisLine={false}
                 tickLine={false}
               />
               <YAxis
-                tick={{ fontSize: 10, fill: '#9b9587' }}
+                tick={{ fontSize: 10, fill: c.axis }}
                 axisLine={false}
                 tickLine={false}
                 width={40}
               />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#151413',
-                  border: 'none',
-                  borderRadius: 8,
-                  color: '#fff',
+                  backgroundColor: c.tooltipBg,
+                  border: `1px solid ${c.tooltipBorder}`,
+                  borderRadius: 2,
+                  color: c.tooltipFg,
                   fontSize: 12,
                 }}
                 formatter={(v: number) => [`${v.toLocaleString()} ${suffix}`, METRIC_OPTIONS.find((o) => o.value === metric)?.label]}
@@ -315,9 +319,9 @@ function ProgressGraph({ history, unit }: { history: ExerciseHistory[]; unit: 'k
               <Line
                 type="monotone"
                 dataKey="value"
-                stroke="#f95f11"
+                stroke={c.accent}
                 strokeWidth={2}
-                dot={{ r: 3, fill: '#f95f11' }}
+                dot={{ r: 3, fill: c.accent }}
                 activeDot={{ r: 5 }}
               />
             </LineChart>

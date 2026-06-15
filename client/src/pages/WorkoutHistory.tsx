@@ -40,8 +40,8 @@ export function WorkoutHistory() {
         action={
           <Link
             to="/workouts/active"
-            className={`btn px-4 py-2.5 text-white ${
-              paused ? 'bg-amber-600 hover:bg-amber-700' : 'bg-blue-500 hover:bg-blue-600'
+            className={`btn px-4 py-2.5 ${
+              paused ? 'bg-amber-600 hover:bg-amber-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-on-accent'
             }`}
           >
             {paused ? 'Resume Workout' : 'New Workout'} <span aria-hidden>→</span>

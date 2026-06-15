@@ -1,4 +1,5 @@
 import { useAuth } from '../../hooks/useAuth';
+import { useTheme } from '../../hooks/useTheme';
 
 export interface SetData {
   weight: number | null;
@@ -19,6 +20,7 @@ interface SetRowProps {
 
 export function SetRow({ setNumber, set, previous, onChange, onRemove }: SetRowProps) {
   const { user } = useAuth();
+  const { advancedSets } = useTheme();
   const unit = user?.unitPreference ?? 'kg';
 
   const label = set.isWarmup ? 'W' : set.isDropset ? 'D' : String(setNumber);
@@ -91,27 +93,29 @@ export function SetRow({ setNumber, set, previous, onChange, onRemove }: SetRowP
         </div>
       </div>
 
-      <div className="flex items-center gap-4 pl-7 pt-1.5">
-        <label className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
-          <input
-            type="checkbox"
-            checked={set.isWarmup}
-            onChange={(e) => toggleWarmup(e.target.checked)}
-            className="rounded"
-          />
-          Warmup
-        </label>
+      {advancedSets && (
+        <div className="flex items-center gap-4 pl-7 pt-1.5">
+          <label className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+            <input
+              type="checkbox"
+              checked={set.isWarmup}
+              onChange={(e) => toggleWarmup(e.target.checked)}
+              className="rounded"
+            />
+            Warmup
+          </label>
 
-        <label className="flex items-center gap-1 text-xs text-amber-700 dark:text-amber-400">
-          <input
-            type="checkbox"
-            checked={set.isDropset}
-            onChange={(e) => toggleDropset(e.target.checked)}
-            className="rounded"
-          />
-          Dropset
-        </label>
-      </div>
+          <label className="flex items-center gap-1 text-xs text-amber-700 dark:text-amber-400">
+            <input
+              type="checkbox"
+              checked={set.isDropset}
+              onChange={(e) => toggleDropset(e.target.checked)}
+              className="rounded"
+            />
+            Dropset
+          </label>
+        </div>
+      )}
     </div>
   );
 }

@@ -112,7 +112,7 @@ export function RestTimer({ seconds, exerciseName, setLabel, onClose }: RestTime
       <div className="flex gap-2 mb-2">
         <button
           onClick={isRunning ? pause : start}
-          className="btn flex-1 py-2 bg-blue-500 hover:bg-blue-600 text-white"
+          className="btn flex-1 py-2 bg-blue-500 hover:bg-blue-600 text-on-accent"
         >
           {isRunning ? 'Pause' : 'Resume'}
         </button>

@@ -12,12 +12,16 @@ import { useGoals } from '../api/goals';
 import { useRoutines } from '../api/routines';
 import { useWorkouts } from '../api/workouts';
 import { useAuth } from '../hooks/useAuth';
+import { useTheme } from '../hooks/useTheme';
+import { chartColors } from '../theme/palettes';
 import { formatDuration, formatDurationTimer, formatRelativeDate, parseDateString } from '../utils/formatting';
 import { loadActiveWorkout, type ActiveWorkoutSnapshot } from '../utils/activeWorkoutStorage';
 import { BarChart, Bar, ResponsiveContainer, Tooltip } from 'recharts';
 
 export function Dashboard() {
   const { user } = useAuth();
+  const { palette, resolvedTheme } = useTheme();
+  const chart = chartColors(palette, resolvedTheme);
   const { data: summary, isLoading: loadingSummary } = useSummary();
   const { data: streaks } = useStreaks();
   const { data: volume } = useVolume(6);
@@ -59,8 +63,8 @@ export function Dashboard() {
         action={
           <Link
             to="/workouts/active"
-            className={`btn px-4 py-2.5 text-white whitespace-nowrap ${
-              paused ? 'bg-amber-600 hover:bg-amber-700' : 'bg-blue-500 hover:bg-blue-600'
+            className={`btn px-4 py-2.5 whitespace-nowrap ${
+              paused ? 'bg-amber-600 hover:bg-amber-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-on-accent'
             }`}
           >
             {paused ? 'Resume Workout' : 'Start Workout'} <span aria-hidden>→</span>
@@ -213,12 +217,12 @@ export function Dashboard() {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={volume} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
                   <Tooltip
-                    cursor={{ fill: 'rgba(249,95,17,0.10)' }}
-                    contentStyle={{ backgroundColor: '#151413', border: '1px solid #37342e', borderRadius: 2, color: '#fff', fontSize: 12 }}
+                    cursor={{ fill: chart.accent, fillOpacity: 0.1 }}
+                    contentStyle={{ backgroundColor: chart.tooltipBg, border: `1px solid ${chart.tooltipBorder}`, borderRadius: 2, color: chart.tooltipFg, fontSize: 12 }}
                     formatter={(v: number) => [`${v.toLocaleString()} ${unit}`, 'Volume']}
                     labelFormatter={(l) => parseDateString(String(l)).toLocaleDateString()}
                   />
-                  <Bar dataKey="volume" fill="#f95f11" radius={[2, 2, 0, 0]} />
+                  <Bar dataKey="volume" fill={chart.accent} radius={[2, 2, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

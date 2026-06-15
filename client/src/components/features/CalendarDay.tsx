@@ -26,7 +26,7 @@ export function CalendarDay({
         ${!isCurrentMonth ? 'text-gray-300 dark:text-gray-700 pointer-events-none' : ''}
         ${isCurrentMonth && !isToday && !isSelected ? 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700' : ''}
         ${isToday && !isSelected ? 'border border-blue-500 text-blue-600 dark:text-blue-400 font-bold' : ''}
-        ${isSelected ? 'bg-blue-500 text-white font-bold' : ''}
+        ${isSelected ? 'bg-blue-500 text-on-accent font-bold' : ''}
       `}
     >
       <span>{date.getDate()}</span>

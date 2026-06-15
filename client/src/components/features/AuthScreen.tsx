@@ -63,7 +63,7 @@ export function SubmitButton({ pending, pendingLabel, label }: SubmitButtonProps
     <button
       type="submit"
       disabled={pending}
-      className="group flex w-full items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 disabled:opacity-60 text-white text-sm font-semibold uppercase tracking-label py-3 transition-colors"
+      className="group flex w-full items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 disabled:opacity-60 text-on-accent text-sm font-semibold uppercase tracking-label py-3 transition-colors"
     >
       {pending ? pendingLabel : label}
       {!pending && (
