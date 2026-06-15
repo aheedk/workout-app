@@ -204,6 +204,12 @@
   html {
     @apply bg-gray-50;
     color-scheme: light;
+    min-height: 100%;
+    /* No rubber-band/overscroll past the content into empty space, and no
+       horizontal pan. The root background already paints the canvas, so even
+       when zoomed out there's no blank area to reveal. */
+    overscroll-behavior: none;
+    overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
@@ -213,7 +219,10 @@
   }
 
   body {
-    @apply font-sans text-gray-900 dark:text-gray-100;
+    @apply font-sans bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100;
+    min-height: 100dvh;
+    overscroll-behavior: none;
+    overflow-x: hidden;
   }
 
   .font-display { font-feature-settings: 'kern' 1; letter-spacing: 0.005em; }
