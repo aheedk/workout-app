@@ -30,19 +30,23 @@ export function RoutineCard({ routine }: { routine: Routine }) {
   return (
     <Link
       to={`/routines/${routine.id}/edit`}
-      className="block bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:border-blue-400 dark:hover:border-blue-500 transition-colors"
+      className="group block plate p-4 hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
     >
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
-          <h3 className="font-semibold text-gray-900 dark:text-white">{routine.name}</h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-            {routine.exercises.length} exercises
-            {routine.lastUsedAt && ` · Last used ${formatRelativeDate(routine.lastUsedAt)}`}
+          <h3 className="font-display text-lg uppercase tracking-wide leading-tight text-gray-900 dark:text-white">
+            {routine.name}
+          </h3>
+          <p className="eyebrow mt-1">
+            {routine.exercises.length} exercise{routine.exercises.length === 1 ? '' : 's'}
+            {routine.lastUsedAt && ` · ${formatRelativeDate(routine.lastUsedAt)}`}
           </p>
         </div>
         <button
           onClick={handleFavorite}
-          className="text-xl leading-none p-1"
+          className={`text-xl leading-none p-1 transition-colors ${
+            routine.isFavorite ? 'text-blue-500' : 'text-gray-400 hover:text-blue-500'
+          }`}
           aria-label="Toggle favorite"
         >
           {routine.isFavorite ? '★' : '☆'}
@@ -54,7 +58,7 @@ export function RoutineCard({ routine }: { routine: Routine }) {
           {routine.tags.map((tag) => (
             <span
               key={tag}
-              className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded"
+              className="text-[0.65rem] font-semibold uppercase tracking-wider px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
             >
               {tag}
             </span>
@@ -66,7 +70,7 @@ export function RoutineCard({ routine }: { routine: Routine }) {
         <button
           onClick={handleStart}
           disabled={startWorkout.isPending}
-          className="w-full py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium rounded-lg transition-colors"
+          className="btn-primary w-full"
         >
           Start Workout
         </button>

@@ -40,11 +40,11 @@ export function WorkoutHistory() {
         action={
           <Link
             to="/workouts/active"
-            className={`px-4 py-2 text-white font-medium rounded-lg ${
-              paused ? 'bg-amber-600 hover:bg-amber-700' : 'bg-blue-600 hover:bg-blue-700'
+            className={`btn px-4 py-2.5 text-white ${
+              paused ? 'bg-amber-600 hover:bg-amber-700' : 'bg-blue-500 hover:bg-blue-600'
             }`}
           >
-            {paused ? 'Resume Workout' : 'New Workout'}
+            {paused ? 'Resume Workout' : 'New Workout'} <span aria-hidden>→</span>
           </Link>
         }
       />
@@ -54,8 +54,8 @@ export function WorkoutHistory() {
           type="text"
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
-          placeholder="Search workouts..."
-          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+          placeholder="Search workouts…"
+          className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
         />
       </form>
 
@@ -68,10 +68,7 @@ export function WorkoutHistory() {
           title="No workouts yet"
           description="Start your first workout to track your progress."
           action={
-            <Link
-              to="/workouts/active"
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg"
-            >
+            <Link to="/workouts/active" className="btn-primary">
               Start Workout
             </Link>
           }
@@ -88,19 +85,19 @@ export function WorkoutHistory() {
               <button
                 onClick={() => setPage(page - 1)}
                 disabled={page <= 1}
-                className="px-4 py-2 bg-gray-100 dark:bg-gray-700 disabled:opacity-50 text-gray-700 dark:text-gray-300 rounded-lg"
+                className="btn-ghost disabled:opacity-40"
               >
-                Previous
+                ← Prev
               </button>
-              <span className="text-sm text-gray-600 dark:text-gray-400">
-                Page {page} of {data.totalPages}
+              <span className="eyebrow">
+                Page {page} / {data.totalPages}
               </span>
               <button
                 onClick={() => setPage(page + 1)}
                 disabled={page >= data.totalPages}
-                className="px-4 py-2 bg-gray-100 dark:bg-gray-700 disabled:opacity-50 text-gray-700 dark:text-gray-300 rounded-lg"
+                className="btn-ghost disabled:opacity-40"
               >
-                Next
+                Next →
               </button>
             </div>
           )}

@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { CalendarDay } from './CalendarDay';
 import { useCalendarData } from '../../api/workouts';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
+import { toLocalDateString } from '../../utils/formatting';
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTHS = [
@@ -63,7 +64,7 @@ export function Calendar({ onDaySelect }: CalendarProps) {
   };
 
   const handleDayClick = (date: Date) => {
-    const iso = date.toISOString().split('T')[0];
+    const iso = toLocalDateString(date);
     setSelectedDate(iso);
     const entry = byDate.get(iso);
     onDaySelect(iso, entry?.ids ?? []);
@@ -79,7 +80,7 @@ export function Calendar({ onDaySelect }: CalendarProps) {
         >
           ←
         </button>
-        <h2 className="font-semibold text-gray-900 dark:text-white">
+        <h2 className="font-display text-xl uppercase tracking-wide text-gray-900 dark:text-white">
           {MONTHS[month]} {year}
         </h2>
         <button
@@ -99,14 +100,14 @@ export function Calendar({ onDaySelect }: CalendarProps) {
         <>
           <div className="grid grid-cols-7 gap-1 mb-2">
             {WEEKDAYS.map((d) => (
-              <div key={d} className="text-center text-xs font-medium text-gray-500 dark:text-gray-400 py-1">
+              <div key={d} className="text-center eyebrow py-1">
                 {d}
               </div>
             ))}
           </div>
           <div className="grid grid-cols-7 gap-1">
             {days.map((date, i) => {
-              const iso = date.toISOString().split('T')[0];
+              const iso = toLocalDateString(date);
               const entry = byDate.get(iso);
               const isToday =
                 date.getDate() === today.getDate() &&

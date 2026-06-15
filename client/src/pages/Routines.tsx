@@ -13,10 +13,7 @@ export function Routines() {
       <PageHeader
         title="Routines"
         action={
-          <Link
-            to="/routines/new"
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg"
-          >
+          <Link to="/routines/new" className="btn-primary">
             New Routine
           </Link>
         }
@@ -31,10 +28,7 @@ export function Routines() {
           title="No routines yet"
           description="Create a reusable workout template to save time."
           action={
-            <Link
-              to="/routines/new"
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg"
-            >
+            <Link to="/routines/new" className="btn-primary">
               Create Routine
             </Link>
           }

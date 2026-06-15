@@ -79,15 +79,12 @@ export function WorkoutDetail() {
         title={workout.name}
         action={
           <div className="flex gap-2">
-            <button
-              onClick={handleRepeat}
-              className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium"
-            >
-              Repeat
+            <button onClick={handleRepeat} className="btn-primary">
+              ↻ Repeat
             </button>
             <button
               onClick={() => setShowConfirm(true)}
-              className="px-3 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg text-sm font-medium"
+              className="btn px-4 py-2.5 border border-red-300 dark:border-red-900 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30"
             >
               Delete
             </button>
@@ -96,24 +93,28 @@ export function WorkoutDetail() {
       />
 
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 mb-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
-            <p className="text-gray-500 dark:text-gray-400">Date</p>
-            <p className="font-medium text-gray-900 dark:text-white">{formatDate(workout.date)}</p>
+            <p className="eyebrow">Date</p>
+            <p className="mt-1 font-mono font-semibold tabular-nums text-gray-900 dark:text-white">
+              {formatDate(workout.date)}
+            </p>
           </div>
           <div>
-            <p className="text-gray-500 dark:text-gray-400">Duration</p>
-            <p className="font-medium text-gray-900 dark:text-white">
+            <p className="eyebrow">Duration</p>
+            <p className="mt-1 font-mono font-semibold tabular-nums text-gray-900 dark:text-white">
               {workout.durationMinutes ? formatDuration(workout.durationMinutes) : '—'}
             </p>
           </div>
           <div>
-            <p className="text-gray-500 dark:text-gray-400">Exercises</p>
-            <p className="font-medium text-gray-900 dark:text-white">{workout.exercises.length}</p>
+            <p className="eyebrow">Exercises</p>
+            <p className="mt-1 font-mono font-semibold tabular-nums text-gray-900 dark:text-white">
+              {workout.exercises.length}
+            </p>
           </div>
           <div>
-            <p className="text-gray-500 dark:text-gray-400">Volume</p>
-            <p className="font-medium text-gray-900 dark:text-white">
+            <p className="eyebrow">Volume</p>
+            <p className="mt-1 font-mono font-semibold tabular-nums text-gray-900 dark:text-white">
               {totalVolume.toLocaleString()} {unit}
             </p>
           </div>
@@ -155,7 +156,7 @@ export function WorkoutDetail() {
           >
             <div className="flex items-center justify-between gap-3 mb-3">
               <div className="min-w-0">
-                <h3 className="font-semibold text-gray-900 dark:text-white truncate">
+                <h3 className="font-display text-xl uppercase tracking-wide leading-tight text-gray-900 dark:text-white truncate">
                   {exercise.exerciseName}
                 </h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">

@@ -19,8 +19,8 @@ import type { Goal, CreateGoalRequest } from '@workout-app/shared';
 const CARD_CLASS =
   'bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5';
 const INPUT_CLASS =
-  'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none';
-const LABEL_CLASS = 'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1';
+  'w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors';
+const LABEL_CLASS = 'eyebrow mb-1.5 block';
 
 export function Profile() {
   const { user, logout } = useAuth();
@@ -44,7 +44,7 @@ export function Profile() {
           </p>
           <button
             onClick={() => logout()}
-            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg"
+            className="btn px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white"
           >
             Log out
           </button>
@@ -85,7 +85,7 @@ function AccountCard() {
 
   return (
     <section className={CARD_CLASS}>
-      <h2 className="font-semibold text-gray-900 dark:text-white mb-4">Account</h2>
+      <h2 className="font-display text-xl uppercase tracking-wide text-gray-900 dark:text-white mb-4">Account</h2>
       <div className="space-y-4">
         <div>
           <label className={LABEL_CLASS}>Name</label>
@@ -99,7 +99,7 @@ function AccountCard() {
             <button
               onClick={saveName}
               disabled={!nameChanged || updateProfile.isPending}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg shrink-0"
+              className="btn-primary shrink-0"
             >
               Save
             </button>
@@ -144,7 +144,7 @@ function PreferencesCard() {
 
   return (
     <section className={CARD_CLASS}>
-      <h2 className="font-semibold text-gray-900 dark:text-white mb-4">Preferences</h2>
+      <h2 className="font-display text-xl uppercase tracking-wide text-gray-900 dark:text-white mb-4">Preferences</h2>
       <div className="space-y-4">
         <div>
           <label className={LABEL_CLASS}>Units</label>
@@ -226,7 +226,7 @@ function PasswordCard() {
 
   return (
     <section className={CARD_CLASS}>
-      <h2 className="font-semibold text-gray-900 dark:text-white mb-4">Change Password</h2>
+      <h2 className="font-display text-xl uppercase tracking-wide text-gray-900 dark:text-white mb-4">Change Password</h2>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
           <label className={LABEL_CLASS}>Current password</label>
@@ -273,7 +273,7 @@ function PasswordCard() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium rounded-lg"
+          className="btn-primary"
         >
           {isSubmitting ? 'Updating…' : 'Update password'}
         </button>
@@ -327,7 +327,7 @@ function BodyweightCard({ unit }: { unit: 'kg' | 'lb' }) {
 
   return (
     <section className={CARD_CLASS}>
-      <h2 className="font-semibold text-gray-900 dark:text-white mb-4">Bodyweight</h2>
+      <h2 className="font-display text-xl uppercase tracking-wide text-gray-900 dark:text-white mb-4">Bodyweight</h2>
 
       <form onSubmit={handleAdd} className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2 mb-4">
         <div>
@@ -357,7 +357,7 @@ function BodyweightCard({ unit }: { unit: 'kg' | 'lb' }) {
           <button
             type="submit"
             disabled={logMutation.isPending || !weight}
-            className="w-full sm:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium rounded-lg"
+            className="w-full sm:w-auto btn-primary"
           >
             Log
           </button>
@@ -439,10 +439,10 @@ function GoalsCard({ unit }: { unit: 'kg' | 'lb' }) {
   return (
     <section className={CARD_CLASS}>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-semibold text-gray-900 dark:text-white">Goals</h2>
+        <h2 className="font-display text-xl uppercase tracking-wide text-gray-900 dark:text-white">Goals</h2>
         <button
           onClick={() => setIsCreating(true)}
-          className="px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg"
+          className="btn-primary px-3 py-1.5"
         >
           + New Goal
         </button>
@@ -608,14 +608,14 @@ function CreateGoalModal({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+            className="btn-ghost"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={createGoal.isPending}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium rounded-lg"
+            className="btn-primary"
           >
             {createGoal.isPending ? 'Creating…' : 'Create Goal'}
           </button>
@@ -643,7 +643,7 @@ function DataCard() {
 
   return (
     <section className={CARD_CLASS}>
-      <h2 className="font-semibold text-gray-900 dark:text-white mb-2">Data</h2>
+      <h2 className="font-display text-xl uppercase tracking-wide text-gray-900 dark:text-white mb-2">Data</h2>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
         Walks every workout in date order and recomputes your personal records.
         Use this if PRs are missing — e.g. after importing workouts or if the
@@ -652,7 +652,7 @@ function DataCard() {
       <button
         onClick={handleBackfill}
         disabled={backfill.isPending}
-        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium rounded-lg"
+        className="btn-primary"
       >
         {backfill.isPending ? 'Scanning…' : 'Recompute PRs'}
       </button>

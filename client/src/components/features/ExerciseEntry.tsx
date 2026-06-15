@@ -127,10 +127,12 @@ export function ExerciseEntry({ entry, onChange, onRemove, onSetComplete, onMove
     <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
       <div className="flex items-start justify-between gap-2 mb-3">
         <button onClick={() => setCollapsed(!collapsed)} className="text-left flex-1 min-w-0">
-          <h3 className="font-semibold text-gray-900 dark:text-white">{entry.exerciseName}</h3>
+          <h3 className="font-display text-lg uppercase tracking-wide leading-tight text-gray-900 dark:text-white">
+            {entry.exerciseName}
+          </h3>
           {previousBest && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-              Previous best: {previousBest.weight} {unit} × {previousBest.reps}
+            <p className="eyebrow mt-1">
+              Prev best: {previousBest.weight} {unit} × {previousBest.reps}
             </p>
           )}
         </button>

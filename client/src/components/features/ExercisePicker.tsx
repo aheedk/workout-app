@@ -42,12 +42,12 @@ export function ExercisePicker({ isOpen, onClose, onSelect }: ExercisePickerProp
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search exercises..."
-            className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+            className="flex-1 px-3 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
             autoFocus
           />
           <button
             onClick={() => setShowCustom(!showCustom)}
-            className="px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300"
+            className="btn-ghost px-4 py-2.5"
           >
             + New
           </button>
@@ -79,11 +79,11 @@ export function ExercisePicker({ isOpen, onClose, onSelect }: ExercisePickerProp
                 <li key={exercise.id}>
                   <button
                     onClick={() => handleSelect(exercise)}
-                    className="w-full text-left px-3 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                    className="w-full text-left px-3 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <div>
-                        <p className="font-medium text-gray-900 dark:text-white">{exercise.name}</p>
+                        <p className="font-display text-base uppercase tracking-wide leading-tight text-gray-900 dark:text-white">{exercise.name}</p>
                         <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
                           {exercise.muscleGroup}
                           {exercise.equipment && ` · ${exercise.equipment}`}
@@ -118,10 +118,10 @@ function FilterButton({
   return (
     <button
       onClick={onClick}
-      className={`px-3 py-1 text-xs font-medium rounded-full capitalize transition-colors ${
+      className={`px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-wider transition-colors ${
         active
-          ? 'bg-blue-600 text-white'
-          : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+          ? 'bg-blue-500 text-white'
+          : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
       }`}
     >
       {children}
@@ -152,18 +152,18 @@ function CreateExerciseForm({
   };
 
   return (
-    <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg space-y-2">
+    <div className="p-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 space-y-2">
       <input
         type="text"
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="Exercise name"
-        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+        className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
       />
       <select
         value={muscleGroup}
         onChange={(e) => setMuscleGroup(e.target.value as MuscleGroup)}
-        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm capitalize focus:ring-2 focus:ring-blue-500 outline-none"
+        className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm capitalize focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
       >
         {MUSCLE_GROUPS.map((mg) => (
           <option key={mg} value={mg}>
@@ -175,13 +175,13 @@ function CreateExerciseForm({
         <button
           onClick={handleCreate}
           disabled={createMutation.isPending || !name.trim()}
-          className="flex-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm rounded-lg"
+          className="btn-primary flex-1 px-3 py-2"
         >
           Create
         </button>
         <button
           onClick={onCancel}
-          className="px-3 py-1.5 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm rounded-lg"
+          className="btn-ghost px-3 py-2"
         >
           Cancel
         </button>

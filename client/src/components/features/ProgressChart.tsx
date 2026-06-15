@@ -47,18 +47,18 @@ export function ProgressChart({ exerciseId }: ProgressChartProps) {
     <div className="h-64">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:opacity-20" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#dcd8cc" className="dark:opacity-20" />
           <XAxis
             dataKey="date"
             tickFormatter={(v) => parseDateString(v).toLocaleDateString('en', { month: 'short', day: 'numeric' })}
-            tick={{ fontSize: 11, fill: '#9ca3af' }}
+            tick={{ fontSize: 11, fill: '#9b9587' }}
             axisLine={false}
             tickLine={false}
           />
-          <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fontSize: 11, fill: '#9b9587' }} axisLine={false} tickLine={false} />
           <Tooltip
             contentStyle={{
-              backgroundColor: 'rgba(30,41,59,0.95)',
+              backgroundColor: '#151413',
               border: 'none',
               borderRadius: 8,
               color: '#fff',
@@ -69,9 +69,9 @@ export function ProgressChart({ exerciseId }: ProgressChartProps) {
           <Line
             type="monotone"
             dataKey="maxWeight"
-            stroke="#3b82f6"
+            stroke="#f95f11"
             strokeWidth={2}
-            dot={{ r: 4, fill: '#3b82f6' }}
+            dot={{ r: 3, fill: '#f95f11' }}
           />
         </LineChart>
       </ResponsiveContainer>

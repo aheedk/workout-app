@@ -62,9 +62,10 @@ export function RestTimer({ seconds, exerciseName, setLabel, onClose }: RestTime
   };
 
   return (
-    <div className="fixed bottom-20 lg:bottom-4 left-1/2 -translate-x-1/2 z-40 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 p-4 w-80">
+    <div className="fixed bottom-20 lg:bottom-4 left-1/2 -translate-x-1/2 z-40 bg-white dark:bg-gray-800 shadow-2xl border border-gray-200 dark:border-gray-700 p-4 w-80">
+      <span className="absolute inset-x-0 top-0 h-[3px] bg-blue-500" aria-hidden />
       <div className="flex items-start justify-between mb-3">
-        <h3 className="font-semibold text-gray-900 dark:text-white">Rest Timer</h3>
+        <h3 className="eyebrow">Rest Timer</h3>
         <button
           onClick={handleClose}
           className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-xl leading-none"
@@ -95,11 +96,15 @@ export function RestTimer({ seconds, exerciseName, setLabel, onClose }: RestTime
             strokeLinecap="round"
             strokeDasharray={`${2 * Math.PI * 44}`}
             strokeDashoffset={`${2 * Math.PI * 44 * (1 - pct / 100)}`}
-            className={done ? 'text-green-500' : 'text-blue-600'}
+            className={done ? 'text-green-500' : 'text-blue-500'}
             style={{ transition: 'stroke-dashoffset 1s linear' }}
           />
         </svg>
-        <span className={`text-3xl font-bold ${done ? 'text-green-600' : 'text-gray-900 dark:text-white'}`}>
+        <span
+          className={`font-mono text-4xl font-bold tabular-nums ${
+            done ? 'text-green-500' : 'text-gray-900 dark:text-white'
+          }`}
+        >
           {formatDurationTimer(remaining)}
         </span>
       </div>
@@ -107,14 +112,11 @@ export function RestTimer({ seconds, exerciseName, setLabel, onClose }: RestTime
       <div className="flex gap-2 mb-2">
         <button
           onClick={isRunning ? pause : start}
-          className="flex-1 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium"
+          className="btn flex-1 py-2 bg-blue-500 hover:bg-blue-600 text-white"
         >
           {isRunning ? 'Pause' : 'Resume'}
         </button>
-        <button
-          onClick={() => reset()}
-          className="flex-1 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium"
-        >
+        <button onClick={() => reset()} className="btn-ghost flex-1 py-2">
           Reset
         </button>
       </div>
@@ -124,7 +126,7 @@ export function RestTimer({ seconds, exerciseName, setLabel, onClose }: RestTime
           <button
             key={s}
             onClick={() => reset(s)}
-            className="flex-1 py-1 text-xs bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-600 dark:text-gray-400"
+            className="flex-1 py-1.5 font-mono text-xs tabular-nums bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors"
           >
             {s}s
           </button>

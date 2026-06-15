@@ -1,7 +1,7 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import type { MuscleGroupData } from '@workout-app/shared';
 
-const COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4', '#ef4444', '#6b7280'];
+const COLORS = ['#f95f11', '#37342e', '#9b9587', '#ff7a33', '#bd3f06', '#c3beaf', '#56514a', '#ffc7a0'];
 
 export function MuscleGroupPie({ data }: { data: MuscleGroupData[] }) {
   if (!data || data.length === 0) {
@@ -34,9 +34,9 @@ export function MuscleGroupPie({ data }: { data: MuscleGroupData[] }) {
           </Pie>
           <Tooltip
             contentStyle={{
-              backgroundColor: 'rgba(30,41,59,0.95)',
+              backgroundColor: '#151413',
               border: 'none',
-              borderRadius: 8,
+              borderRadius: 2,
               color: '#fff',
             }}
             formatter={(v: number, _name, item) => [

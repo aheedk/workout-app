@@ -1,6 +1,7 @@
 import { BarChart, Bar, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from 'recharts';
 import type { VolumeDataPoint } from '@workout-app/shared';
 import { useAuth } from '../../hooks/useAuth';
+import { parseDateString } from '../../utils/formatting';
 
 export function VolumeChart({ data }: { data: VolumeDataPoint[] }) {
   const { user } = useAuth();
@@ -18,26 +19,26 @@ export function VolumeChart({ data }: { data: VolumeDataPoint[] }) {
     <div className="h-64">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:opacity-20" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#dcd8cc" className="dark:opacity-20" />
           <XAxis
             dataKey="date"
-            tickFormatter={(v) => new Date(v).toLocaleDateString('en', { month: 'short', day: 'numeric' })}
-            tick={{ fontSize: 11, fill: '#9ca3af' }}
+            tickFormatter={(v) => parseDateString(v).toLocaleDateString('en', { month: 'short', day: 'numeric' })}
+            tick={{ fontSize: 11, fill: '#9b9587' }}
             axisLine={false}
             tickLine={false}
           />
-          <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fontSize: 11, fill: '#9b9587' }} axisLine={false} tickLine={false} />
           <Tooltip
             contentStyle={{
-              backgroundColor: 'rgba(30,41,59,0.95)',
+              backgroundColor: '#151413',
               border: 'none',
-              borderRadius: 8,
+              borderRadius: 2,
               color: '#fff',
             }}
             formatter={(v: number) => [`${v.toLocaleString()} ${unit}`, 'Volume']}
-            labelFormatter={(l) => new Date(l).toLocaleDateString()}
+            labelFormatter={(l) => parseDateString(String(l)).toLocaleDateString()}
           />
-          <Bar dataKey="volume" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+          <Bar dataKey="volume" fill="#f95f11" radius={[2, 2, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>

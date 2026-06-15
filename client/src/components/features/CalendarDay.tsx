@@ -22,18 +22,18 @@ export function CalendarDay({
       onClick={onClick}
       disabled={!isCurrentMonth}
       className={`
-        aspect-square flex flex-col items-center justify-center rounded-lg text-sm relative
+        aspect-square flex flex-col items-center justify-center font-mono tabular-nums text-sm relative transition-colors
         ${!isCurrentMonth ? 'text-gray-300 dark:text-gray-700 pointer-events-none' : ''}
         ${isCurrentMonth && !isToday && !isSelected ? 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700' : ''}
-        ${isToday && !isSelected ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300 font-semibold' : ''}
-        ${isSelected ? 'bg-blue-600 text-white font-semibold' : ''}
+        ${isToday && !isSelected ? 'border border-blue-500 text-blue-600 dark:text-blue-400 font-bold' : ''}
+        ${isSelected ? 'bg-blue-500 text-white font-bold' : ''}
       `}
     >
       <span>{date.getDate()}</span>
       {hasWorkout && (
         <span
           className={`mt-0.5 w-1.5 h-1.5 rounded-full ${
-            isSelected ? 'bg-white' : 'bg-blue-600 dark:bg-blue-400'
+            isSelected ? 'bg-white' : 'bg-blue-500'
           }`}
         />
       )}

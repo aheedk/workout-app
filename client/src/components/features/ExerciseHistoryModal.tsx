@@ -285,25 +285,25 @@ function ProgressGraph({ history, unit }: { history: ExerciseHistory[]; unit: 'k
         <div className="h-48">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={data} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:opacity-20" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#dcd8cc" className="dark:opacity-20" />
               <XAxis
                 dataKey="date"
                 tickFormatter={(v) =>
                   parseDateString(String(v)).toLocaleDateString('en', { month: 'short', day: 'numeric' })
                 }
-                tick={{ fontSize: 10, fill: '#9ca3af' }}
+                tick={{ fontSize: 10, fill: '#9b9587' }}
                 axisLine={false}
                 tickLine={false}
               />
               <YAxis
-                tick={{ fontSize: 10, fill: '#9ca3af' }}
+                tick={{ fontSize: 10, fill: '#9b9587' }}
                 axisLine={false}
                 tickLine={false}
                 width={40}
               />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: 'rgba(30,41,59,0.95)',
+                  backgroundColor: '#151413',
                   border: 'none',
                   borderRadius: 8,
                   color: '#fff',
@@ -315,9 +315,9 @@ function ProgressGraph({ history, unit }: { history: ExerciseHistory[]; unit: 'k
               <Line
                 type="monotone"
                 dataKey="value"
-                stroke="#3b82f6"
+                stroke="#f95f11"
                 strokeWidth={2}
-                dot={{ r: 3, fill: '#3b82f6' }}
+                dot={{ r: 3, fill: '#f95f11' }}
                 activeDot={{ r: 5 }}
               />
             </LineChart>

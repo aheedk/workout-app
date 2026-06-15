@@ -150,7 +150,7 @@ export function RoutineFormPage() {
 
       <div className="space-y-4 max-w-2xl">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="eyebrow mb-1.5 block">
             Name
           </label>
           <input
@@ -158,12 +158,12 @@ export function RoutineFormPage() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Push Day"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+            className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="eyebrow mb-1.5 block">
             Tags (comma-separated)
           </label>
           <input
@@ -171,16 +171,16 @@ export function RoutineFormPage() {
             value={tagsInput}
             onChange={(e) => setTagsInput(e.target.value)}
             placeholder="push, upper, strength"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+            className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
           />
         </div>
 
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Exercises</label>
+            <label className="eyebrow">Exercises</label>
             <button
               onClick={() => setPickerOpen(true)}
-              className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg"
+              className="btn-ghost px-3 py-2"
             >
               + Add Exercise
             </button>
@@ -210,7 +210,7 @@ export function RoutineFormPage() {
                         ▼
                       </button>
                     </div>
-                    <p className="font-medium text-gray-900 dark:text-white truncate">
+                    <p className="font-display text-base uppercase tracking-wide leading-tight text-gray-900 dark:text-white truncate">
                       {ex.exerciseName}
                     </p>
                   </div>
@@ -264,13 +264,13 @@ export function RoutineFormPage() {
           <button
             onClick={handleSubmit}
             disabled={createMutation.isPending || updateMutation.isPending}
-            className="px-5 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium rounded-lg"
+            className="btn-primary px-5 py-2.5"
           >
             {isEdit ? 'Save Changes' : 'Create Routine'}
           </button>
           <Link
             to="/routines"
-            className="px-5 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg"
+            className="btn-ghost px-5 py-2.5"
           >
             Cancel
           </Link>
@@ -344,7 +344,7 @@ function NumField({
         }}
         min={min}
         step={step}
-        className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+        className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono tabular-nums focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
       />
     </label>
   );

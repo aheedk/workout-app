@@ -100,7 +100,7 @@ export function Analytics() {
       )}
 
       <div className={`${CARD_CLASS} mt-6`}>
-        <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
+        <h3 className="eyebrow mb-4">
           Volume (last 12 weeks)
         </h3>
         <VolumeChart data={volume ?? []} />
@@ -108,12 +108,12 @@ export function Analytics() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
         <div className={CARD_CLASS}>
-          <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Muscle Groups</h3>
+          <h3 className="eyebrow mb-4">Muscle Groups</h3>
           <MuscleGroupPie data={muscleGroups ?? []} />
         </div>
 
         <div className={CARD_CLASS}>
-          <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Recent Personal Records</h3>
+          <h3 className="eyebrow mb-4">Recent Personal Records</h3>
           {topRecords.length === 0 ? (
             <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-8">
               No PRs yet — finish a workout to start tracking.
@@ -128,7 +128,7 @@ export function Analytics() {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <PRBadge size="xs" />
-                      <p className="font-medium text-gray-900 dark:text-white truncate">
+                      <p className="font-display text-base uppercase tracking-wide leading-tight text-gray-900 dark:text-white truncate">
                         {pr.exerciseName}
                       </p>
                     </div>
@@ -137,7 +137,7 @@ export function Analytics() {
                     </p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="font-semibold text-gray-900 dark:text-white">
+                    <p className="font-mono font-bold tabular-nums text-gray-900 dark:text-white">
                       {formatRecordValue(pr, unit)}
                     </p>
                   </div>
@@ -149,7 +149,7 @@ export function Analytics() {
       </div>
 
       <div className={`${CARD_CLASS} mt-6`}>
-        <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
+        <h3 className="eyebrow mb-4">
           Workout Frequency (last 12 weeks)
         </h3>
         <FrequencyChart data={frequency ?? []} />
@@ -157,11 +157,11 @@ export function Analytics() {
 
       <div className={`${CARD_CLASS} mt-6`}>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-          <h3 className="font-semibold text-gray-900 dark:text-white">Exercise Progress</h3>
+          <h3 className="eyebrow">Exercise Progress</h3>
           <select
             value={selectedExerciseId}
             onChange={(e) => setSelectedExerciseId(e.target.value)}
-            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+            className="px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
           >
             <option value="">Select an exercise…</option>
             {exercises?.map((ex) => (
