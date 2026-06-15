@@ -1,4 +1,5 @@
 import React from 'react';
+import { LogoMark, APP_NAME } from '../ui/Logo';
 
 /** Shared input + label styling for the auth forms. */
 export const fieldClass =
@@ -25,15 +26,15 @@ export function AuthScreen({ title, subtitle, children, footer }: AuthScreenProp
         className="pointer-events-none select-none absolute -right-10 bottom-[-4rem] font-display text-[34vw] leading-none uppercase text-gray-900/[0.035] dark:text-white/[0.035]"
         aria-hidden
       >
-        Iron
+        {APP_NAME}
       </span>
 
       <div className="relative z-10 w-full max-w-md animate-plate-in">
-        <div className="mb-6 flex items-center gap-3">
-          <span className="flex h-9 w-9 items-center justify-center bg-gray-900 dark:bg-gray-50">
-            <span className="font-display text-2xl leading-none text-blue-500 -mt-0.5">L</span>
+        <div className="mb-6 flex items-center gap-2.5">
+          <LogoMark className="h-8 w-8 text-blue-500" />
+          <span className="font-display text-2xl leading-none tracking-wide text-gray-900 dark:text-white">
+            {APP_NAME}
           </span>
-          <span className="eyebrow">Iron Ledger</span>
         </div>
 
         <div className="relative plate p-8">
